@@ -7,39 +7,30 @@
 .INCLUDE "m328pdef.inc"
 .ORG 0x0000 
 RJMP init
-;.ORG 0x0012
-;RJMP Timer2OverflowInterrupt
+.ORG 0x0012
+RJMP Timer2OverflowInterrupt
 .ORG 0x0020
 RJMP Timer0OverflowInterrupt
 
 init:
-	;Keyboard-------------------------------------------------------
-	; Configure input pin PB0 
-	/*LDI R16,0xF0
-	OUT DDRD,R16
-	LDI R16,0x0F
-	OUT PORTD,R16*/
-
-	SBI DDRC,2						; Pin PC2 is an output (LED)
-	CBI PORTC,2					; Output Vcc => LED1 is turned off!
-	SBI DDRC,3						; Pin PC2 is an output (LED)
-	CBI PORTC,3					; Output Vcc => LED1 is turned off!
-	;---------------------------------------------------------------
-
-
-	/*;set the input from the switch PB0
-	CBI DDRB,0
-	SBI PORTB,0	;Enable the pull-up resistor*/
-	
 	;set timer0 prescalerto 8
 	;LDI	R17,2
 	LDI	R17,4
 	OUT TCCR0B,R17	;The prescaler is set to 8
+	
+	;set timer2 prescalerto 8
+	LDI R17,7
+	STS TCCR2B,R17
+	
+
 
 	;set correct ‘reload values’
 	;LDI R16,0xB9	;Setting the TCNT value
 	LDI R16,56	;Setting the TCNT value
 	OUT TCNT0,R16
+
+	LDI R16,255
+	STS TCNT2,R16
 
 	;enable global interrupt & timer0 interrupt
 	LDI	R18,0x80
@@ -47,6 +38,7 @@ init:
 	LDI R19,1
 	STS	TIMSK0,R19
 
+	STS TIMSK2,R19
 
 	;Clearing the outputs
 	SBI DDRB,3			
@@ -76,8 +68,7 @@ LDI R17, 0x80
 ST Z,R17
 LDI R25,6
 
-/*LDI R21,255
-LDI R23,255*/
+LDI R21,10
 
 InitKeyboard:
     ; Configure input pin PB0 
@@ -93,7 +84,7 @@ InitKeyboard:
 	LDI R16,0x0F
 	OUT PORTD,R16
 	NOP
-
+	
 Main:
 	SBI PORTC,2
 	SBI PORTC,3
@@ -104,33 +95,73 @@ Main:
 	RJMP upOrDown
 	SBIS PIND,3
 	RJMP left
-	;SBIS PIND,0
-	;RJMP buzzer
-	TST R23
-	BRNE Main
-	LDI R23,255
 
-	LDI ZH,0x01
-	LDI R19,255
-	LDI R21,255
-	LDI R18,10
-	speedDelay:
-		speedDelay2:
-			speedDelay3:
-				DEC R18
-				BRNE speedDelay3
-				LDI R18,10
-			DEC R19
-			BRNE speedDelay2
-			LDI R19,255
-		DEC R21
-		BRNE speedDelay
-		LDI R21,255
-	;LDI ZL,0x12						; ZL is the register R30------Z = ZH + ZL
-	LD R17,Z
+	RJMP Main
 
-	CPI R25,6
-	BRNE notRight
+right:
+	; Configure input pin PB0 
+	LDI R16,0xFF
+	OUT DDRD,R16
+	NOP
+	OUT PORTD,R16
+	NOP
+
+	LDI R16,0x0F
+	OUT DDRD,R16
+	NOP
+	LDI R16,0xF0
+	OUT PORTD,R16
+	NOP
+
+	SBIS PIND,6
+	LDI R25,6
+	
+	;RJMP endReading
+	RJMP InitKeyboard
+upOrDown:
+	; Configure input pin PB0 
+	LDI R16,0xFF
+	OUT DDRD,R16
+	NOP
+	OUT PORTD,R16
+	NOP
+
+	LDI R16,0x0F
+	OUT DDRD,R16
+	NOP
+	LDI R16,0xF0
+	OUT PORTD,R16
+	NOP
+
+	SBIS PIND,5
+	LDI R25,2
+	SBIS PIND,7
+	LDI R25,8
+
+	;RJMP endReading
+	RJMP InitKeyboard
+left:
+	; Configure input pin PB0 
+	LDI R16,0xFF
+	OUT DDRD,R16
+	NOP
+	OUT PORTD,R16
+	NOP
+
+	LDI R16,0x0F
+	OUT DDRD,R16
+	NOP
+	LDI R16,0xF0
+	OUT PORTD,R16
+	NOP
+
+	SBIS PIND,6
+	LDI R25,4
+	;RJMP endReading
+	RJMP InitKeyboard
+
+
+moveRight:
 	; Horisontal movement----------------------------------
 	ROR R17							; Horisontal diplacement
 	BRCC isZero
@@ -144,7 +175,7 @@ Main:
 	ADIW Z,4
 	ST Z,R17
 	CLC
-	RJMP Main
+	RJMP notDown
 	notLineX5:
 	SUBI R18,10
 	BRGE CheckWall5
@@ -156,23 +187,19 @@ Main:
 	ADIW Z,4
 	ST Z,R17
 	CLC
-	RJMP Main
+	RJMP notDown
 	notLineX0:
 	SUBI R18,10
 	BRGE CheckWall0
-	
 	ST -Z,R17
 	CLC
-	RJMP Main
+	RJMP notDown
 	isZero:
 	ST Z,R17							; Horisontal diplacement
+	RJMP notDown
 	;------------------------------------------------------
 
-	notRight:
-
-
-	CPI R25,4
-	BRNE notLeft
+moveLeft:
 	; Horisontal movement----------------------------------
 	ROL R17							; Horisontal diplacement
 	BRCC noCarry
@@ -186,7 +213,7 @@ Main:
 	SBIW Z,4
 	ST Z,R17
 	CLC
-	RJMP Main
+	RJMP notDown
 	notLineX9:
 	SUBI R18,10
 	BRGE CheckWall9
@@ -198,17 +225,34 @@ Main:
 	SBIW Z,4
 	ST Z,R17
 	CLC
-	RJMP Main
+	RJMP notDown
 	notLineX4:
 	SUBI R18,10
 	BRGE CheckWall4
 	ADIW Z,1
 	ST Z,R17
 	CLC
-	RJMP Main
+	RJMP notDown
 	noCarry:
 	ST Z,R17							; Horisontal diplacement
+	RJMP notDown
 	;------------------------------------------------------
+
+Timer2OverflowInterrupt:
+	DEC R21
+	BRNE notDown
+	LDI R21,10
+	LDI ZH,0x01
+
+	CPI R25,6
+	BRNE notRight
+	RJMP moveRight
+	
+	notRight:
+
+	CPI R25,4
+	BRNE notLeft
+	RJMP moveLeft
 
 	notLeft:
 
@@ -231,6 +275,7 @@ Main:
 	ADIW ZL,10							; Subtract 10 from Z
 	LDI ZH,0x01
 	ST Z,R17
+	RJMP notDown
 	;------------------------------------------------
 	notUp:
 
@@ -253,88 +298,10 @@ Main:
 	SBIW ZL,10							; Subtract 10 from Z
 	LDI ZH,0x01
 	ST Z,R17
+
 	;------------------------------------------------
 	notDown:
 
-	RJMP Main
-
-right:
-	; Configure input pin PB0 
-	LDI R16,0xFF
-	OUT DDRD,R16
-	NOP
-	OUT PORTD,R16
-	NOP
-
-	LDI R16,0x0F
-	OUT DDRD,R16
-	NOP
-	LDI R16,0xF0
-	OUT PORTD,R16
-	NOP
-
-	;SBIS PIND,4						; Skip next instruction if the least significant bit of pin D is set.
-	;RJMP ledOne
-	;SBIS PIND,5
-	;RJMP ledTwo
-	SBIS PIND,6
-	LDI R25,6
-	;RJMP leds
-	;SBIS PIND,7
-	;LDI R25,8
-	
-	;RJMP buzzer
-
-	RJMP InitKeyboard
-upOrDown:
-	; Configure input pin PB0 
-	LDI R16,0xFF
-	OUT DDRD,R16
-	NOP
-	OUT PORTD,R16
-	NOP
-
-	LDI R16,0x0F
-	OUT DDRD,R16
-	NOP
-	LDI R16,0xF0
-	OUT PORTD,R16
-	NOP
-
-	;SBIS PIND,4						; Skip next instruction if the least significant bit of pin D is set.
-	;RJMP ledOne
-	SBIS PIND,5
-	LDI R25,2
-	;RJMP ledTwo
-	;SBIS PIND,6
-	;RJMP leds
-	SBIS PIND,7
-	LDI R25,8
-	;RJMP buzzer
-
-	RJMP InitKeyboard
-left:
-	; Configure input pin PB0 
-	LDI R16,0xFF
-	OUT DDRD,R16
-	NOP
-	OUT PORTD,R16
-	NOP
-
-	LDI R16,0x0F
-	OUT DDRD,R16
-	NOP
-	LDI R16,0xF0
-	OUT PORTD,R16
-	NOP
-
-	SBIS PIND,6
-	LDI R25,4
-
-	RJMP InitKeyboard
-
-
-Timer2OverflowInterrupt:
 	RETI
 
 Timer0OverflowInterrupt:
@@ -348,12 +315,6 @@ PUSH R16
 PUSH R17						;save R17 on the stack
 PUSH ZL
 
-;Move counter
-/*DEC R21
-BRNE count
-LDI R21,255
-DEC R23
-count:*/
 
 LDI ZL,0x00
 LDI ZH,0x01						;init Z to point do address 0x0100
