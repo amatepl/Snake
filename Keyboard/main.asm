@@ -59,13 +59,35 @@ DEC R21
 BRNE WriteByteToScreenbuffer	;write 70 bytes
 ;-------------------------------------------------------------------------------------------------------
 
+;Send data to screenbuffer------------------------------------------------------------------------------
+LDI YL,0x00						; ZL is the register R30------Z = ZL+ZH
+LDI YH,0x02						;init Z to point do address 0x0100----------ZH is the register R31
+LDI R17 ,0x00					;we will write this value to every byte of the whole screenbuffer
+
+LDI R21,80						;need to write 70 bytes to fill the whole screenbuffer
+WriteObstacleToScreenbuffer:
+ST Y+,R17						;write value from Ra to address pointed by Z and auto-increse Z pointer
+DEC R21
+BRNE WriteObstacleToScreenbuffer	;write 70 bytes
+;-------------------------------------------------------------------------------------------------------
+
 ;Add a line on the screen
 ;LDI ZL,0x12						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
 LDI ZL,34						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
 LDI ZH,0x01						;init Z to point do address 0x0100----------ZH is the register R31
-LDI R17, 0x80
+LDI R17, 0x40
 ;STD Z+3,R17
 ST Z,R17
+
+;Add a obstacle on the screen
+
+LDI YL,36						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
+LDI YH,0x02						;init Z to point do address 0x0100----------ZH is the register R31
+LDI R17, 0x10
+;STD Z+3,R17
+ST Y,R17
+
+
 LDI R25,6
 
 LDI R21,10
@@ -97,6 +119,21 @@ Main:
 	RJMP left
 
 	RJMP Main
+
+
+
+	/*LDI R23,8
+	DEC R23
+	ROR R17*/
+
+
+
+
+
+
+
+
+
 
 right:
 	; Configure input pin PB0 
@@ -163,12 +200,15 @@ left:
 
 moveRight:
 	; Horisontal movement----------------------------------
+	;checkPast:
 	ROR R17							; Horisontal diplacement
 	BRCC isZero
-	ST Z,R17
-	ROR R17
-	
-	LDI R18,75
+	/* 
+	The carry bit is set so we've got to change the rectangle to the one on the right 
+	*/
+	ST Z,R17						; Write R17 to the current Z
+	ROR R17							; Rotating R17 here puts back the carry into the bit sequence
+	LDI R18,75						; We've got to check if we reached the screen boundary
 	CheckWall5:
 	CP ZL,R18
 	BRNE notLineX5
@@ -196,6 +236,33 @@ moveRight:
 	RJMP notDown
 	isZero:
 	ST Z,R17							; Horisontal diplacement
+	
+	
+	
+	/*;SBIW Z,1
+	MOV R18,ZL
+	ADIW Z,1
+	LD R17,Z
+	ROR R17
+	BRCC noPast
+	MOV ZL,R18
+	LD R17,Z
+	ORI R17,0x80
+	ST Z,R17
+	noPast:
+	LDI ZH,0x01
+	MOV ZL,R18
+	LD R17,Z*/
+
+
+
+
+
+
+	;RJMP checkPast
+
+
+
 	RJMP notDown
 	;------------------------------------------------------
 
@@ -239,6 +306,8 @@ moveLeft:
 	;------------------------------------------------------
 
 Timer2OverflowInterrupt:
+	PUSH R22
+	PUSH YL
 	DEC R21
 	BRNE notDown
 	LDI R21,10
@@ -301,7 +370,17 @@ Timer2OverflowInterrupt:
 
 	;------------------------------------------------
 	notDown:
-
+	/*
+	This small section is responisible for eating an obstacle/object.
+	*/
+	MOV YL,ZL
+	LD R22,Y
+	SUB R22,R17
+	BRNE noOnObstacle
+	ST Y,R22
+	noOnObstacle:
+	POP YL
+	POP R22
 	RETI
 
 Timer0OverflowInterrupt:
@@ -313,12 +392,24 @@ The goal of the interrupt is to refresh the screen,
 ;Initialising Z
 PUSH R16
 PUSH R17						;save R17 on the stack
+PUSH R18
+PUSH R19
 PUSH ZL
+PUSH YL
 
+/* 
+We use 2 poiners registers for the screen Z contains the snake while Y the object the snake can eat.
+*/
 
 LDI ZL,0x00
 LDI ZH,0x01						;init Z to point do address 0x0100
 LD R17,Z+						;write value from address pointed by Z to Ra and auto-increse Z pointer
+
+LDI YL,0x00
+LDI YH,0x02						;init Z to point do address 0x0100
+LD R18,Y+						;write value from address pointed by Z to Ra and auto-increse Z pointer
+
+
 ;Rows counter
 LDI R22,0x01
 
@@ -330,12 +421,16 @@ Send1Row:
 	LDI R16,80	
 	CLC	
 	COLUMNS:
-
 	CBI PORTB,3							;Set PB3 low
 	ROR R17								;Rotate R17 right througth carry
 	BRCC NOPB3							;Branch if carry is 0
 	SBI PORTB,3							;carry is 1 => set PB3 high
 NOPB3:
+	ROR R18								;Rotate R17 right througth carry
+	BRCC noObstacle							;Branch if carry is 0
+	SBI PORTB,3							;carry is 1 => set PB3 high
+
+noObstacle:
 	CBI PORTB,5							;Set PB5 low
 	SBI PORTB,5							;Set PB5 high
 	DEC R20
@@ -343,6 +438,7 @@ NOPB3:
 	;ROR R17								
 	LDI R20,8
 	LD R17,Z+							;write value from address pointed by Z to Ra and auto-increse Z pointer
+	LD R18,Y+
 CONTINUE:
 	DEC R16
 	BRNE COLUMNS
@@ -382,7 +478,10 @@ CBI PORTB,4								;Set PB4 low
 TST R22									;Check if R22 = 0x00
 BRNE Send1Row							;If R22 != 0x00 plot next row if not, stop the time interrupt
 ;ROL R22
+POP YL
 POP ZL
+POP R19
+POP R18
 POP R17									;restore R17 from the stack
 POP R16
 CLC
