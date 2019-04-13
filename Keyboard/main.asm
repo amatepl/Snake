@@ -81,16 +81,15 @@ ST Z,R17
 
 ;Add a obstacle on the screen
 
-LDI YL,36						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
+LDI YL,72						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
 LDI YH,0x02						;init Z to point do address 0x0100----------ZH is the register R31
 LDI R17, 0x10
 ;STD Z+3,R17
 ST Y,R17
 
-
-LDI R25,6
-
-LDI R21,10
+LDI R25,6						;Initial direction (right) of the snake
+LDI R23,3						;Initial length of the snake.
+LDI R21,10						; R21 is used as the counter for the move interrupt
 
 InitKeyboard:
     ; Configure input pin PB0 
@@ -307,9 +306,10 @@ moveLeft:
 
 Timer2OverflowInterrupt:
 	PUSH R22
+	PUSH R23
 	PUSH YL
-	DEC R21
-	BRNE notDown
+	DEC R21								; Decrement the counter
+	BRNE notDown						; Since the interrupt happens to often we add a counter which makes it proceed to the code every 10 times.
 	LDI R21,10
 	LDI ZH,0x01
 
@@ -380,6 +380,7 @@ Timer2OverflowInterrupt:
 	ST Y,R22
 	noOnObstacle:
 	POP YL
+	POP R23
 	POP R22
 	RETI
 
@@ -462,6 +463,9 @@ SBI PORTB,4								;Set PB4 high
 ;PB4 delay parameters
 LDI R16,2
 LDI R20,255
+
+LDI R23,2								;Setting up the delay between SBI PB4 and CBI PB4
+LDI R24,255
 time1:
 	time2:
 		DEC R23
