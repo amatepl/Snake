@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.7  D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm Sat Apr 13 12:49:05 2019
+AVRASM ver. 2.2.7  D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm Mon Apr 15 15:08:52 2019
 
 
 EQU  SIGNATURE_000 0000001e
@@ -731,5 +731,6 @@ CSEG noObstacle   00000113
 CSEG CONTINUE     0000011a
 CSEG ROWS         0000011e
 CSEG NOONE        00000122
+CSEG notRow8      00000126
 CSEG time1        0000012c
 CSEG time2        0000012c

@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.7  D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm Sat Apr 13 12:49:05 2019
+AVRASM ver. 2.2.7  D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm Mon Apr 15 15:08:52 2019
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m328pdef.inc'
 D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm(7): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m328pdef.inc'
@@ -1083,7 +1083,7 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 000038 e0f1                      LDI ZH,0x01						;init Z to point do address 0x0100----------ZH is the register R31
 000039 e010                      LDI R17 ,0x00					;we will write this value to every byte of the whole screenbuffer
                                  
-00003a e550                      LDI R21,80						;need to write 70 bytes to fill the whole screenbuffer
+00003a e456                      LDI R21,70						;need to write 70 bytes to fill the whole screenbuffer
                                  WriteByteToScreenbuffer:
 00003b 9311                      ST Z+,R17						;write value from Ra to address pointed by Z and auto-increse Z pointer
 00003c 955a                      DEC R21
@@ -1095,7 +1095,7 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 00003f e0d2                      LDI YH,0x02						;init Z to point do address 0x0100----------ZH is the register R31
 000040 e010                      LDI R17 ,0x00					;we will write this value to every byte of the whole screenbuffer
                                  
-000041 e550                      LDI R21,80						;need to write 70 bytes to fill the whole screenbuffer
+000041 e456                      LDI R21,70						;need to write 70 bytes to fill the whole screenbuffer
                                  WriteObstacleToScreenbuffer:
 000042 9319                      ST Y+,R17						;write value from Ra to address pointed by Z and auto-increse Z pointer
 000043 955a                      DEC R21
@@ -1104,15 +1104,15 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
                                  
                                  ;Add a line on the screen
                                  ;LDI ZL,0x12						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
-000045 e2e2                      LDI ZL,34						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
+000045 e0e9                      LDI ZL,9						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
 000046 e0f1                      LDI ZH,0x01						;init Z to point do address 0x0100----------ZH is the register R31
-000047 e410                      LDI R17, 0x40
+000047 e710                      LDI R17, 0x70
                                  ;STD Z+3,R17
 000048 8310                      ST Z,R17
                                  
                                  ;Add a obstacle on the screen
                                  
-000049 e4c8                      LDI YL,72						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
+000049 e4c5                      LDI YL,69						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
 00004a e0d2                      LDI YH,0x02						;init Z to point do address 0x0100----------ZH is the register R31
 00004b e110                      LDI R17, 0x10
                                  ;STD Z+3,R17
@@ -1363,11 +1363,11 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 0000d7 8320                      	ST Z,R18							; Set Z to 0
                                  
 0000d8 2f3e                      	MOV R19,ZL
-0000d9 34e6                      	CPI ZL,70							; Compare ZL to 20 if smaller then change the rect
+0000d9 33ec                      	CPI ZL,60							; Compare ZL to 70 if higher then change the rect
 0000da f028                      	BRLO ChangeRectUp
 0000db e421                      	LDI R18,65
 0000dc 1be2                      	SUB ZL,R18							;Subtract 65 from ZL but don't worry we add 10 at the end!
-0000dd 343b                      	CPI R19,75							;Compare the original ZL with 75 to see if we are at the top of the screen
+0000dd 3431                      	CPI R19,65							;Compare the original ZL with 75 to see if we are at the top of the screen
 0000de f008                      	BRLO ChangeRectUp
                                  	;LDI R18,10
 0000df 973a                      	SBIW ZL,10
@@ -1386,11 +1386,11 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 0000e7 8320                      	ST Z,R18							; Set Z to 0
                                  
 0000e8 2f3e                      	MOV R19,ZL							; Value of ZL to R19
-0000e9 31e4                      	CPI ZL,20							; Compare ZL to 20 if smaller then change the rect
+0000e9 30ea                      	CPI ZL,10							; Compare ZL to 20 if smaller then change the rect
 0000ea f428                      	BRSH ChangeRect
 0000eb e421                      	LDI R18,65						
 0000ec 0fe2                      	ADD ZL,R18							;Adding 65 to ZL since it is lower than 20
-0000ed 303f                      	CPI R19,15							;Compare the original ZL with 15 to see if we are at the bottom of the screen
+0000ed 3035                      	CPI R19,5							;Compare the original ZL with 15 to see if we are at the bottom of the screen
 0000ee f408                      	BRSH ChangeRect
                                  	;LDI R18,10
 0000ef 963a                      	ADIW ZL,10							;We're at the bottom so ZL = ZL + 65 + 10
@@ -1443,22 +1443,28 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
                                  
                                  
                                  ;Rows counter
-000108 e061                      LDI R22,0x01
-                                 
+000108 e062                      LDI R22,0x02
+                                 ;lDI R22,0
+                                 ;LDI R19,7
                                  
                                  Send1Row:
+                                     ;CPI R22,0x80
+                                 	;BRNE pa
+                                 	;LDI R22,0x01
+                                 	;pa:
+                                 
                                  	;Byte counter
 000109 e048                      	LDI R20,8
                                  	;Columns counter
 00010a e500                      	LDI R16,80	
-00010b 9488                      	CLC	
+00010b 9488                      	CLC
                                  	COLUMNS:
 00010c 982b                      	CBI PORTB,3							;Set PB3 low
 00010d 9517                      	ROR R17								;Rotate R17 right througth carry
 00010e f408                      	BRCC NOPB3							;Branch if carry is 0
 00010f 9a2b                      	SBI PORTB,3							;carry is 1 => set PB3 high
                                  NOPB3:
-000110 9527                      	ROR R18								;Rotate R17 right througth carry
+000110 9527                      	ROR R18								;Rotate R18 right througth carry
 000111 f408                      	BRCC noObstacle							;Branch if carry is 0
 000112 9a2b                      	SBI PORTB,3							;carry is 1 => set PB3 high
                                  
@@ -1467,7 +1473,7 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 000114 9a2d                      	SBI PORTB,5							;Set PB5 high
 000115 954a                      	DEC R20
 000116 f419                      	BRNE CONTINUE						;Branch if not all the bits have been analysed
-                                 	;ROR R17								
+                                 								
 000117 e048                      	LDI R20,8
 000118 9111                      	LD R17,Z+							;write value from address pointed by Z to Ra and auto-increse Z pointer
 000119 9129                      	LD R18,Y+
@@ -1487,7 +1493,8 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 000123 9a2d                      	SBI PORTB,5							;Set PB5 high
 000124 950a                      	DEC R16
 000125 f7c1                      	BRNE ROWS
-                                 
+                                 	
+                                 notRow8:
 000126 982c                      CBI PORTB,4								;Set PB4 low
 000127 9a2c                      SBI PORTB,4								;Set PB4 high
                                  ;Delay
@@ -1495,20 +1502,18 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 000128 e002                      LDI R16,2
 000129 ef4f                      LDI R20,255
                                  
-00012a e072                      LDI R23,2								;Setting up the delay between SBI PB4 and CBI PB4
+00012a e079                      LDI R23,9								;Setting up the delay between SBI PB4 and CBI PB4
 00012b ef8f                      LDI R24,255
                                  time1:
                                  	time2:
 00012c 957a                      		DEC R23
 00012d f7f1                      		BRNE time2
-00012e e072                      		LDI R23,2
+00012e e079                      		LDI R23,9
 00012f 958a                      	DEC R24
 000130 f7d9                      	BRNE time1
 000131 ef8f                      	LDI R24,255
                                  
 000132 982c                      CBI PORTB,4								;Set PB4 low
-                                 
-                                 ;CPI R22,0x80
                                  
 000133 2366                      TST R22									;Check if R22 = 0x00
 000134 f6a1                      BRNE Send1Row							;If R22 != 0x00 plot next row if not, stop the time interrupt

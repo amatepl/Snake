@@ -52,7 +52,7 @@ LDI ZL,0x00						; ZL is the register R30------Z = ZL+ZH
 LDI ZH,0x01						;init Z to point do address 0x0100----------ZH is the register R31
 LDI R17 ,0x00					;we will write this value to every byte of the whole screenbuffer
 
-LDI R21,80						;need to write 70 bytes to fill the whole screenbuffer
+LDI R21,70						;need to write 70 bytes to fill the whole screenbuffer
 WriteByteToScreenbuffer:
 ST Z+,R17						;write value from Ra to address pointed by Z and auto-increse Z pointer
 DEC R21
@@ -64,7 +64,7 @@ LDI YL,0x00						; ZL is the register R30------Z = ZL+ZH
 LDI YH,0x02						;init Z to point do address 0x0100----------ZH is the register R31
 LDI R17 ,0x00					;we will write this value to every byte of the whole screenbuffer
 
-LDI R21,80						;need to write 70 bytes to fill the whole screenbuffer
+LDI R21,70						;need to write 70 bytes to fill the whole screenbuffer
 WriteObstacleToScreenbuffer:
 ST Y+,R17						;write value from Ra to address pointed by Z and auto-increse Z pointer
 DEC R21
@@ -73,15 +73,15 @@ BRNE WriteObstacleToScreenbuffer	;write 70 bytes
 
 ;Add a line on the screen
 ;LDI ZL,0x12						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
-LDI ZL,34						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
+LDI ZL,9						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
 LDI ZH,0x01						;init Z to point do address 0x0100----------ZH is the register R31
-LDI R17, 0x40
+LDI R17, 0x70
 ;STD Z+3,R17
 ST Z,R17
 
 ;Add a obstacle on the screen
 
-LDI YL,72						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
+LDI YL,69						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
 LDI YH,0x02						;init Z to point do address 0x0100----------ZH is the register R31
 LDI R17, 0x10
 ;STD Z+3,R17
@@ -332,11 +332,11 @@ Timer2OverflowInterrupt:
 	ST Z,R18							; Set Z to 0
 
 	MOV R19,ZL
-	CPI ZL,70							; Compare ZL to 20 if smaller then change the rect
+	CPI ZL,60							; Compare ZL to 70 if higher then change the rect
 	BRLO ChangeRectUp
 	LDI R18,65
 	SUB ZL,R18							;Subtract 65 from ZL but don't worry we add 10 at the end!
-	CPI R19,75							;Compare the original ZL with 75 to see if we are at the top of the screen
+	CPI R19,65							;Compare the original ZL with 75 to see if we are at the top of the screen
 	BRLO ChangeRectUp
 	;LDI R18,10
 	SBIW ZL,10
@@ -355,11 +355,11 @@ Timer2OverflowInterrupt:
 	ST Z,R18							; Set Z to 0
 
 	MOV R19,ZL							; Value of ZL to R19
-	CPI ZL,20							; Compare ZL to 20 if smaller then change the rect
+	CPI ZL,10							; Compare ZL to 20 if smaller then change the rect
 	BRSH ChangeRect
 	LDI R18,65						
 	ADD ZL,R18							;Adding 65 to ZL since it is lower than 20
-	CPI R19,15							;Compare the original ZL with 15 to see if we are at the bottom of the screen
+	CPI R19,5							;Compare the original ZL with 15 to see if we are at the bottom of the screen
 	BRSH ChangeRect
 	;LDI R18,10
 	ADIW ZL,10							;We're at the bottom so ZL = ZL + 65 + 10
@@ -412,22 +412,28 @@ LD R18,Y+						;write value from address pointed by Z to Ra and auto-increse Z p
 
 
 ;Rows counter
-LDI R22,0x01
-
+LDI R22,0x02
+;lDI R22,0
+;LDI R19,7
 
 Send1Row:
+    ;CPI R22,0x80
+	;BRNE pa
+	;LDI R22,0x01
+	;pa:
+
 	;Byte counter
 	LDI R20,8
 	;Columns counter
 	LDI R16,80	
-	CLC	
+	CLC
 	COLUMNS:
 	CBI PORTB,3							;Set PB3 low
 	ROR R17								;Rotate R17 right througth carry
 	BRCC NOPB3							;Branch if carry is 0
 	SBI PORTB,3							;carry is 1 => set PB3 high
 NOPB3:
-	ROR R18								;Rotate R17 right througth carry
+	ROR R18								;Rotate R18 right througth carry
 	BRCC noObstacle							;Branch if carry is 0
 	SBI PORTB,3							;carry is 1 => set PB3 high
 
@@ -436,7 +442,7 @@ noObstacle:
 	SBI PORTB,5							;Set PB5 high
 	DEC R20
 	BRNE CONTINUE						;Branch if not all the bits have been analysed
-	;ROR R17								
+								
 	LDI R20,8
 	LD R17,Z+							;write value from address pointed by Z to Ra and auto-increse Z pointer
 	LD R18,Y+
@@ -456,7 +462,8 @@ NOONE:
 	SBI PORTB,5							;Set PB5 high
 	DEC R16
 	BRNE ROWS
-
+	
+notRow8:
 CBI PORTB,4								;Set PB4 low
 SBI PORTB,4								;Set PB4 high
 ;Delay
@@ -464,20 +471,18 @@ SBI PORTB,4								;Set PB4 high
 LDI R16,2
 LDI R20,255
 
-LDI R23,2								;Setting up the delay between SBI PB4 and CBI PB4
+LDI R23,9								;Setting up the delay between SBI PB4 and CBI PB4
 LDI R24,255
 time1:
 	time2:
 		DEC R23
 		BRNE time2
-		LDI R23,2
+		LDI R23,9
 	DEC R24
 	BRNE time1
 	LDI R24,255
 
 CBI PORTB,4								;Set PB4 low
-
-;CPI R22,0x80
 
 TST R22									;Check if R22 = 0x00
 BRNE Send1Row							;If R22 != 0x00 plot next row if not, stop the time interrupt
