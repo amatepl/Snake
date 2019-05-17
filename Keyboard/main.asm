@@ -70,6 +70,17 @@ ST Y+,R17						;write value from Ra to address pointed by Z and auto-increse Z p
 DEC R21
 BRNE WriteObstacleToScreenbuffer	;write 70 bytes
 ;-------------------------------------------------------------------------------------------------------
+;Send data to movebuffer------------------------------------------------------------------------------
+LDI XL,0x00						; ZL is the register R30------Z = ZL+ZH
+LDI XH,0x03						;init Z to point do address 0x0100----------ZH is the register R31
+LDI R17 ,0x00					;we will write this value to every byte of the whole screenbuffer
+
+LDI R21,70						;need to write 70 bytes to fill the whole screenbuffer
+WriteMoveToMovebuffer:
+ST X+,R17						;write value from Ra to address pointed by Z and auto-increse Z pointer
+DEC R21
+BRNE WriteMoveToMovebuffer	;write 70 bytes
+;-------------------------------------------------------------------------------------------------------
 
 ;Add a line on the screen
 ;LDI ZL,0x12						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
@@ -207,7 +218,7 @@ moveRight:
 	*/
 	ST Z,R17						; Write R17 to the current Z
 	ROR R17							; Rotating R17 here puts back the carry into the bit sequence
-	LDI R18,75						; We've got to check if we reached the screen boundary
+	LDI R18,65						; We've got to check if we reached the screen boundary
 	CheckWall5:
 	CP ZL,R18
 	BRNE notLineX5
@@ -219,7 +230,7 @@ moveRight:
 	SUBI R18,10
 	BRGE CheckWall5
 
-	LDI R18,70
+	LDI R18,60
 	CheckWall0:
 	CP ZL,R18
 	BRNE notLineX0
@@ -272,7 +283,7 @@ moveLeft:
 	ST Z,R17
 	ROL R17
 	
-	LDI R18,79
+	LDI R18,69
 	CheckWall9:
 	CP ZL,R18
 	BRNE notLineX9
@@ -284,7 +295,7 @@ moveLeft:
 	SUBI R18,10
 	BRGE CheckWall9
 
-	LDI R18,74
+	LDI R18,64
 	CheckWall4:
 	CP ZL,R18
 	BRNE notLineX4
