@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.7  D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm Mon May 06 11:19:22 2019
+AVRASM ver. 2.2.7  D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm Sat May 18 00:55:27 2019
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m328pdef.inc'
 D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm(7): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m328pdef.inc'
@@ -1037,590 +1037,723 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
                                  
                                  ; ***** END OF FILE ******************************************************
                                  .ORG 0x0000 
-000000 c020                      RJMP init
+000000 c020                      RJMP PRESSstart
                                  .ORG 0x0012
-000012 c0bb                      RJMP Timer2OverflowInterrupt
+000012 c14b                      RJMP Timer2OverflowInterrupt
+                                 .ORG 0x001A
+00001a c144                      RJMP Timer1OverflowInterrupt
                                  .ORG 0x0020
-000020 c0e2                      RJMP Timer0OverflowInterrupt
+000020 c18f                      RJMP Timer0OverflowInterrupt
                                  
-                                 init:
-                                 	;set timer0 prescalerto 8
-                                 	;LDI	R17,2
-000021 e014                      	LDI	R17,4
-000022 bd15                      	OUT TCCR0B,R17	;The prescaler is set to 8
+                                 ; -------------------------------------------------------- PRESS START ------------------------------------------------------------------
+                                 PRESSstart :
+000021 e0c0                      	LDI YL,0x00
+000022 e0d1                      	LDI YH,0x01
+                                 
+000023 e003                      	LDI R16,3         ;P
+000024 9309                      	ST Y+,R16		  
+000025 e004                      	LDI R16,4		  ;R
+000026 9309                      	ST Y+,R16
+000027 e002                      	LDI R16,2		  ;E
+000028 9309                      	ST Y+,R16
+000029 e005                      	LDI R16,5		  ;S
+00002a 9309                      	ST Y+,R16
+00002b 9309                      	ST Y+,R16         ;S
+00002c e000                      	LDI R16,0
+00002d e016                      	LDI R17,6
+                                 	loop :
+00002e 9309                      		ST Y+,R16
+00002f 951a                      		DEC R17
+000030 f7e9                      	BRNE loop
+000031 e005                      	LDI R16,5         ;S
+000032 9309                      	ST Y+,R16
+000033 e006                      	LDI R16,6         ;T
+000034 9309                      	ST Y+,R16
+000035 e001                      	LDI R16,1         ;A
+000036 9309                      	ST Y+,R16
+000037 e004                      	LDI R16,4         ;R
+000038 9309                      	ST Y+,R16
+000039 e006                      	LDI R16,6         ;T
+00003a 8308                      	ST Y,R16
+                                 
+                                 init :
+                                 	.DEF random = R23
+00003b ec68                      	LDI R22,200
+00003c ef7f                      	LDI random,255
+00003d 9468                      	SET
+00003e 9a23                      	SBI DDRB,3			    ; Pin PB3 is an output
+00003f 982b                      	CBI PORTB,3	
+                                 
+000040 9a24                      	SBI DDRB,4				; Pin PB4 is an output
+000041 982c                      	CBI PORTB,4
+                                 
+000042 9a25                      	SBI DDRB,5				; Pin PB5 is an output
+000043 982d                      	CBI PORTB,5
+000044 c015                      	RJMP start
+                                 
+                                 ; ------------------- shift of the row in the screen ------------------------
+                                 rowon :
+000045 1f55                      	ROL R21           ; Rotate to the left
+000046 f408                      	BRCC rowoff
+000047 9a2b                      	SBI PORTB,3
+                                 rowoff :
+000048 9a2d                      	SBI PORTB,5
+000049 982d                      	CBI PORTB,5
+00004a 982b                      	CBI PORTB,3
+00004b 951a                      	DEC R17           ; Do this 8 times
+00004c f7c1                      	BRNE rowon
+                                 
+00004d 9a2c                      SBI PORTB,4           ; PB4 need to stay at one a certain amount of time
+00004e ef3f                      LDI R19,255
+00004f e049                      LDI R20, 9
+                                 wait1:
+                                 	wait2:
+000050 954a                      		DEC R20
+000051 f7f1                      		BRNE wait2
+000052 e049                      	LDI R20,9
+000053 953a                      	DEC R19
+000054 f7d9                      	BRNE wait1
+000055 982c                      CBI PORTB,4
+                                 
+000056 950a                      DEC R16                ; Change the position of the byte in flash memory
+000057 9526                      LSR R18                ; shift to the rigth the shift register
+000058 f009                      BREQ start             ; if shift equal to 0 => go to start
+000059 c00a                      RJMP display           ; go to display either
+                                 ; --------------------------------------------------------------------------
+                                 
+                                 start :
+00005a e006                      	LDI R16,6               ; Count from 6 to 0 to have all the flash line
+00005b e420                      	LDI R18, 0b01000000     ; Send the row
+00005c 956a                      	DEC R22
+00005d f431                      	BRNE display
+00005e f01e                      	BRTS clearT
+00005f ec68                      	LDI R22,200
+000060 9468                      	SET
+000061 c002                      	RJMP display
+                                 	clearT :
+000062 e169                      		LDI R22,25
+000063 94e8                      		CLT
+                                 
+                                 display :
+000064 e1c0                      	LDI YL,0x10
+000065 e0d1                      	LDI YH,0x01             ; 16 blocks to display
+000066 e018                      	LDI R17,8               ; constant
+000067 e130                      	LDI R19,16              ; counter of each blocks
+                                 
+000068 ef5f                      	LDI R21,0xFF            ; Transition on PIN D
+000069 b95a                      	OUT DDRD,R21
+00006a b95b                      	OUT PORTD,R21
+                                 
+                                 	; Configure the PIN D of the keyboard
+00006b ef50                      	LDI R21,0xF0   
+00006c b95a                      	OUT DDRD,R21            ; PIN 7:4 are outputs and 3:0 are inputs
+00006d e05f                      	LDI R21,0x0F
+00006e b95b                      	OUT PORTD,R21			; PIN 3:0 have pull-up resistor on
+00006f c001                      	RJMP COUNTloop
+                                 
+                                 NEWcounter :
+000070 ef7f                      	LDI random,255
+                                 
+                                 COUNTloop :
+000071 ef5f                      	LDI R21,0xFF            ; Transition on PIN D
+000072 b95a                      	OUT DDRD,R21
+000073 b95b                      	OUT PORTD,R21
+                                 
+000074 ef50                      	LDI R21,0xF0   
+000075 b95a                      	OUT DDRD,R21            ; PIN 7:4 are outputs and 3:0 are inputs
+000076 e05f                      	LDI R21,0x0F
+000077 b95b                      	OUT PORTD,R21			; PIN 3:0 have pull-up resistor on
+                                 
+000078 957a                      	DEC random              ; Decrement random
+000079 3071                      	CPI random,1		    ; IF random equal 1
+00007a f3a9                      	BREQ NEWcounter
+00007b 9b48                      	SBIS PIND,0				; Button is pushed in the column 0 go to the next instruction
+00007c c001                      	RJMP READloop
+00007d c00a                      	RJMP blocksloop
+                                 
+                                 READloop :
+00007e ef5f                      	LDI R21,0xFF            ; Transition on PIN D
+00007f b95a                      	OUT DDRD,R21
+000080 b95b                      	OUT PORTD,R21
+                                 
+000081 e05f                      	LDI R21,0x0F			; PIN 7:4 are inputs and 3:0 are outputs
+000082 b95a                      	OUT DDRD,R21
+000083 ef50                      	LDI R21,0xF0			; PIN 7:4 have pull-up resistor on
+000084 b95b                      	OUT PORTD,R21
+000085 0000                      	NOP
+                                 
+000086 9b4c                      	SBIS PIND,4				; Button is pushed in the column 0 and row 4 go to the next instruction
+000087 c01c                      	RJMP begin
+                                 
+                                 blocksloop :
+000088 eee8                      	LDI ZL,low(CharTable << 1)        ; First element in flash memory
+000089 e0f3                      	LDI ZH,high(CharTable << 1)
+00008a f01e                      	BRTS show
+                                 
+                                 notshow :
+00008b e050                      	LDI R21,0
+00008c c00b                      	RJMP block
+00008d e045                      	LDI R20,5                ; We must shift 5 times
+                                 
+                                 show :
+00008e 915a                      	LD R21,-Y                       ; Load the line that we need on the flash
+00008f 9f51                      	MUL R21,R17                     ; multiply by eight to have the first element of the line 
+000090 2d50                      	MOV R21,R0
+000091 0f50                      	ADD R21,R16					    ; Add row to have the byte of the line
+000092 1fe5                      	ADC ZL,R21                      ; Add this value on Z
+000093 f410                      	BRCC nc
+000094 e051                      	LDI R21,1
+000095 0ff5                      	ADD ZH,R21
+                                 	nc :
+000096 9154                      	LPM R21,Z		                ; Load the byte at the position stored in Z in R21
+000097 e045                      	LDI R20,5                       ; We must shift 5 times
+                                 
+                                 block :
+000098 9557                      	ROR R21           ; shift to the right R21 
+000099 f408                      	BRCC turnoff   
+00009a 9a2b                      	SBI PORTB,3		  ; If it's a one turn on the LED
+                                 
+                                 turnoff :
+00009b 9a2d                      	SBI PORTB,5       ; Rising edge to put in the shift register
+00009c 982d                      	CBI PORTB,5
+00009d 982b                      	CBI PORTB,3       ; Don't forget to clear PB3
+00009e 954a                      	DEC R20           ; Decrement counter2 5 times
+00009f f7c1                      	BRNE block
+                                 
+0000a0 953a                      DEC R19               ; Decrement counter1 16 times (corresponding to the number of block)
+0000a1 f731                      BRNE blocksloop
+0000a2 2f52                      MOV R21,R18           ; Put the row shifting on another register
+0000a3 cfa1                      RJMP rowon
+                                 
+                                 ; ---------------------------------------------------------------------------------------------------------------------------------------
+                                 ; -------------------------------------------------------- SNAKE ------------------------------------------------------------------------
+                                 begin:
+                                 	.DEF direction	= R25
+                                 	.DEF score		= R21
+                                 	.DEF bytesnake	= R17
+                                 	.DEF bytefood	= R18
+                                 	.DEF speed		= R22
+                                 	.DEF toggle		= R24			; Used to make the fruit darker
+                                 
+0000a4 e06f                      	LDI speed,0x0F
+0000a5 e050                      	LDI score, 0
+0000a6 e081                      	LDI toggle, 1
+                                 
+                                 	;-------------------TIMERS----------------------------------
+                                 
+                                 	;Set timer0 prescaler to 256
+0000a7 e004                      	LDI	R16,4
+0000a8 bd05                      	OUT TCCR0B,R16	
+                                 
+0000a9 e000                      	LDI R16,0
+0000aa 9300 0064                 	STS PRR,R16
+                                 	;Set timer1 prescaler to 1024
+0000ac e003                      	LDI	R16,3
+0000ad 9300 0081                 	STS TCCR1B,R16	
                                  	
-                                 	;set timer2 prescalerto 8
-000023 e017                      	LDI R17,7
-000024 9310 00b1                 	STS TCCR2B,R17
-                                 	
+                                 	;Set timer2 with the maximum prescaler
+0000af e007                      	LDI R16,7
+0000b0 9300 00b1                 	STS TCCR2B,R16
                                  
+                                 	;Setting the TCNT0 value at 312Hz
+0000b2 e308                      	LDI R16,56	
+0000b3 bd06                      	OUT TCNT0,R16
                                  
-                                 	;set correct ‘reload values’
-                                 	;LDI R16,0xB9	;Setting the TCNT value
-000026 e308                      	LDI R16,56	;Setting the TCNT value
-000027 bd06                      	OUT TCNT0,R16
+                                 	;Setting the TCNT1 value at 1Hz -> TCNT1  = 49911
+0000b4 ef0f                      	LDI R16,0xFF	
+0000b5 e03f                      	LDI R19,0x0F
+0000b6 9330 0085                 	STS TCNT1H,R19
+0000b8 9300 0084                 	STS TCNT1L,R16
                                  
-000028 ef0f                      	LDI R16,255
-000029 9300 00b2                 	STS TCNT2,R16
+                                 	;Setting the TCNT2 with the maximum value to have the lowest frequency
+0000ba ef0f                      	LDI R16,255
+0000bb 9300 00b2                 	STS TCNT2,R16
                                  
-                                 	;enable global interrupt & timer0 interrupt
-00002b e820                      	LDI	R18,0x80
-00002c bf2f                      	OUT	SREG,R18
-00002d e031                      	LDI R19,1
-00002e 9330 006e                 	STS	TIMSK0,R19
-                                 
-000030 9330 0070                 	STS TIMSK2,R19
+                                 	;enable global interrupt & timer0 and timer2 interrupt
+0000bd e800                      	LDI	R16,0x80
+0000be bf0f                      	OUT	SREG,R16
+0000bf e001                      	LDI R16,1
+0000c0 9300 006e                 	STS	TIMSK0,R16
+0000c2 9300 006f                 	STS TIMSK1,R16
+0000c4 9300 0070                 	STS TIMSK2,R16
                                  
                                  	;Clearing the outputs
-000032 9a23                      	SBI DDRB,3			
-000033 9a24                      	SBI DDRB,4
-000034 9a25                      	SBI DDRB,5
-000035 982c                      	CBI PORTB,4
-000036 982d                      	CBI PORTB,5
+0000c6 9a23                      	SBI DDRB,3			    ; Pin PB3 is an output
+0000c7 982b                      	CBI PORTB,3	
+                                 
+0000c8 9a24                      	SBI DDRB,4				; Pin PB4 is an output
+0000c9 982c                      	CBI PORTB,4
+                                 
+0000ca 9a25                      	SBI DDRB,5				; Pin PB5 is an output
+0000cb 982d                      	CBI PORTB,5
                                  
                                  ;Send data to screenbuffer------------------------------------------------------------------------------
-000037 e0e0                      LDI ZL,0x00						; ZL is the register R30------Z = ZL+ZH
-000038 e0f1                      LDI ZH,0x01						;init Z to point do address 0x0100----------ZH is the register R31
-000039 e010                      LDI R17 ,0x00					;we will write this value to every byte of the whole screenbuffer
+0000cc e0e0                      LDI ZL,0x00						; ZL is the register R30------Z = ZL+ZH
+0000cd e0f1                      LDI ZH,0x01						; init Z to point do address 0x0100----------ZH is the register R31
+0000ce e000                      LDI R16 ,0x00					; We will write this value to every byte of the whole screenbuffer
                                  
-00003a e456                      LDI R21,70						;need to write 70 bytes to fill the whole screenbuffer
+0000cf e436                      LDI R19,70						; Need to write 70 bytes to fill the whole screenbuffer
                                  WriteByteToScreenbuffer:
-00003b 9311                      ST Z+,R17						;write value from Ra to address pointed by Z and auto-increse Z pointer
-00003c 955a                      DEC R21
-00003d f7e9                      BRNE WriteByteToScreenbuffer	;write 70 bytes
+0000d0 9301                      	ST Z+,R16					;write value from Ra to address pointed by Z and auto-increase Z pointer
+0000d1 953a                      	DEC R19
+0000d2 f7e9                      	BRNE WriteByteToScreenbuffer	;write 70 bytes
                                  ;-------------------------------------------------------------------------------------------------------
                                  
-                                 ;Send data to screenbuffer------------------------------------------------------------------------------
-00003e e0c0                      LDI YL,0x00						; ZL is the register R30------Z = ZL+ZH
-00003f e0d2                      LDI YH,0x02						;init Z to point do address 0x0100----------ZH is the register R31
-000040 e010                      LDI R17 ,0x00					;we will write this value to every byte of the whole screenbuffer
+                                 ;Send obstacle to screenbuffer------------------------------------------------------------------------------
+0000d3 e0c0                      LDI YL,0x00						; YL is the register R32------Y = YL+YH
+0000d4 e0d2                      LDI YH,0x02						; init Y to point do address 0x0200----------YH is the register R33
                                  
-000041 e456                      LDI R21,70						;need to write 70 bytes to fill the whole screenbuffer
+0000d5 e436                      LDI R19,70						;need to write 70 bytes to fill the whole screenbuffer
                                  WriteObstacleToScreenbuffer:
-000042 9319                      ST Y+,R17						;write value from Ra to address pointed by Z and auto-increse Z pointer
-000043 955a                      DEC R21
-000044 f7e9                      BRNE WriteObstacleToScreenbuffer	;write 70 bytes
+0000d6 9309                      	ST Y+,R16						;write value from Ra to address pointed by Y and auto-increase Y pointer
+0000d7 953a                      	DEC R19
+0000d8 f7e9                      	BRNE WriteObstacleToScreenbuffer	;write 70 bytes
                                  ;-------------------------------------------------------------------------------------------------------
                                  ;Send data to movebuffer------------------------------------------------------------------------------
-000045 e0a0                      LDI XL,0x00						; ZL is the register R30------Z = ZL+ZH
-000046 e0b3                      LDI XH,0x03						;init Z to point do address 0x0100----------ZH is the register R31
-000047 e010                      LDI R17 ,0x00					;we will write this value to every byte of the whole screenbuffer
+0000d9 e0a0                      LDI XL,0x00						; ZL is the register R30------Z = ZL+ZH
+0000da e0b3                      LDI XH,0x03						;init Z to point do address 0x0100----------ZH is the register R31
+0000db e010                      LDI R17 ,0x00					;we will write this value to every byte of the whole screenbuffer
                                  
-000048 e456                      LDI R21,70						;need to write 70 bytes to fill the whole screenbuffer
+0000dc e456                      LDI R21,70						;need to write 70 bytes to fill the whole screenbuffer
                                  WriteMoveToMovebuffer:
-000049 931d                      ST X+,R17						;write value from Ra to address pointed by Z and auto-increse Z pointer
-00004a 955a                      DEC R21
-00004b f7e9                      BRNE WriteMoveToMovebuffer	;write 70 bytes
+0000dd 931d                      ST X+,R17						;write value from Ra to address pointed by Z and auto-increse Z pointer
+0000de 955a                      DEC R21
+0000df f7e9                      BRNE WriteMoveToMovebuffer	;write 70 bytes
                                  ;-------------------------------------------------------------------------------------------------------
                                  
-                                 ;Add a line on the screen
-                                 ;LDI ZL,0x12						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
-00004c e0e9                      LDI ZL,9						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
-00004d e0f1                      LDI ZH,0x01						;init Z to point do address 0x0100----------ZH is the register R31
-00004e e710                      LDI R17, 0x70
-                                 ;STD Z+3,R17
-00004f 8310                      ST Z,R17
+                                 ; Add the move point on the screen at a deterministic place
+0000e0 e3ef                      LDI ZL,63					    ; Take the position of the byte
+0000e1 e011                      LDI bytesnake, 0x01                   ; Set one bit on the byte
+0000e2 8310                      ST Z,bytesnake                        ; Put the value pointed by Z
                                  
-                                 ;Add a obstacle on the screen
+                                 ;Add food for snake on the screen
+                                 generate :
+0000e3 7f7f                      	ANDI random,0b011111111         ; We want a random number < 70 => we need 7 bits => random,7 = 0
+0000e4 3476                      	CPI random,70                   ; Compare random register to 70
+0000e5 f408                      	BRSH LSFR270                    ; If it's equal or bigger than 70 use LSFR
+0000e6 c00a                      	RJMP food                       
+                                 LSFR270 :
+0000e7 2f07                      	MOV R16, random                 ; Clone random to R16                    ex : R16 = 0b01111110
+0000e8 2f37                      	MOV R19, random                 ; Clone random to R19                         R17 = 0b01111110
+0000e9 9576                      	LSR random                      ; Shift to the right random                   random = 0b00111111
+0000ea fb00                      	BST R16,0					    ; Take the first bit of R16                   T = 0
+0000eb f976                      	BLD random,6                    ; Put this at seventh place of random         random = 0b00111111
+0000ec f936                      	BLD R19,6                       ; Same for R19                                R17 = 0b00111110
+0000ed 2730                      	EOR R19,R16                     ; R19 = R16 xor R19                           R17 = 0b01000000
+0000ee fb36                      	BST R19,6                       ; Take the seventh bit of R19                 T = 1
+0000ef f975                      	BLD random,5                    ; Put this at the sixth place of random       random = 0b00111111
+0000f0 cff2                      	RJMP generate                   ; Test if the new random is smaller than 70
                                  
-000050 e4c5                      LDI YL,69						; ZL is the register R30------Z = ZL+ZH  We use ZL to address directly the right pointer
-000051 e0d2                      LDI YH,0x02						;init Z to point do address 0x0100----------ZH is the register R31
-000052 e110                      LDI R17, 0x10
-                                 ;STD Z+3,R17
-000053 8318                      ST Y,R17
+                                 food :
+0000f1 e0c0                      	LDI YL,0x00                     ; Begin Y = 0x0200
+0000f2 0fc7                      	ADD YL,random				    ; Add it the random number smaller than 70
+0000f3 e820                      	LDI bytefood, 0x80                   ; Set one bit on the byte
+0000f4 8328                      	ST Y,bytefood			      	    ; Put the value pointed by Y
                                  
-000054 e096                      LDI R25,6						;Initial direction (right) of the snake
-000055 e073                      LDI R23,3						;Initial length of the snake.
-000056 e05a                      LDI R21,10						; R21 is used as the counter for the move interrupt
+0000f5 e096                      LDI direction,6						;Initial direction (right) of the snake
+                                 
                                  
                                  InitKeyboard:
-                                     ; Configure input pin PB0 
-000057 ef0f                      	LDI R16,0xFF
-000058 b90a                      	OUT DDRD,R16
-000059 0000                      	NOP
-00005a b90b                      	OUT PORTD,R16
-00005b 0000                      	NOP
+                                     ; Configure input pin PD0 
+0000f6 ef0f                      	LDI R16,0xFF
+0000f7 b90a                      	OUT DDRD,R16
+0000f8 b90b                      	OUT PORTD,R16               ; Transition of PIND
                                  
-00005c ef00                      	LDI R16,0xF0
-00005d b90a                      	OUT DDRD,R16
-00005e 0000                      	NOP
-00005f e00f                      	LDI R16,0x0F
-000060 b90b                      	OUT PORTD,R16
-000061 0000                      	NOP
+0000f9 ef00                      	LDI R16,0xF0		        ; PIND 7:4 are outputs and 3:0 are inputs
+0000fa b90a                      	OUT DDRD,R16
+0000fb e00f                      	LDI R16,0x0F				; PIND 3:0 have pull-up resistor
+0000fc b90b                      	OUT PORTD,R16
                                  	
                                  Main:
-000062 9a42                      	SBI PORTC,2
-000063 9a43                      	SBI PORTC,3
-                                 
-000064 9b49                      	SBIS PIND,1						; Skip next instruction if the least significant bit of pin D is set.
-000065 c005                      	RJMP right
-000066 9b4a                      	SBIS PIND,2
-000067 c011                      	RJMP upOrDown
-000068 9b4b                      	SBIS PIND,3
-000069 c01f                      	RJMP left
-                                 
-00006a cff7                      	RJMP Main
-                                 
-                                 
-                                 
-                                 	/*LDI R23,8
-                                 	DEC R23
-                                 	ROR R17*/
-                                 
-                                 
-                                 
-                                 
-                                 
-                                 
-                                 
-                                 
-                                 
+0000fd 9b49                      	SBIS PIND,1	    
+0000fe c005                      	RJMP right
+0000ff 9b4a                      	SBIS PIND,2
+000100 c00e                      	RJMP upOrDown
+000101 9b4b                      	SBIS PIND,3
+000102 c019                      	RJMP left
+000103 cff9                      	RJMP Main
                                  
                                  right:
-                                 	; Configure input pin PB0 
-00006b ef0f                      	LDI R16,0xFF
-00006c b90a                      	OUT DDRD,R16
-00006d 0000                      	NOP
-00006e b90b                      	OUT PORTD,R16
-00006f 0000                      	NOP
+000104 ef0f                      	LDI R16,0xFF
+000105 b90a                      	OUT DDRD,R16
+000106 b90b                      	OUT PORTD,R16				; Transition of PIND
                                  
-000070 e00f                      	LDI R16,0x0F
-000071 b90a                      	OUT DDRD,R16
-000072 0000                      	NOP
-000073 ef00                      	LDI R16,0xF0
-000074 b90b                      	OUT PORTD,R16
-000075 0000                      	NOP
+000107 e00f                      	LDI R16,0x0F
+000108 b90a                      	OUT DDRD,R16
+000109 ef00                      	LDI R16,0xF0
+00010a b90b                      	OUT PORTD,R16
+00010b 0000                      	NOP
                                  
-000076 9b4e                      	SBIS PIND,6
-000077 e096                      	LDI R25,6
+00010c 9b4e                      	SBIS PIND,6
+00010d e096                      	LDI direction,6
                                  	
-                                 	;RJMP endReading
-000078 cfde                      	RJMP InitKeyboard
-                                 upOrDown:
-                                 	; Configure input pin PB0 
-000079 ef0f                      	LDI R16,0xFF
-00007a b90a                      	OUT DDRD,R16
-00007b 0000                      	NOP
-00007c b90b                      	OUT PORTD,R16
-00007d 0000                      	NOP
+00010e cfe7                      	RJMP InitKeyboard
                                  
-00007e e00f                      	LDI R16,0x0F
-00007f b90a                      	OUT DDRD,R16
-000080 0000                      	NOP
-000081 ef00                      	LDI R16,0xF0
-000082 b90b                      	OUT PORTD,R16
-000083 0000                      	NOP
+                                 upOrDown: 
+00010f ef0f                      	LDI R16,0xFF
+000110 b90a                      	OUT DDRD,R16
+000111 b90b                      	OUT PORTD,R16
                                  
-000084 9b4d                      	SBIS PIND,5
-000085 e092                      	LDI R25,2
-000086 9b4f                      	SBIS PIND,7
-000087 e098                      	LDI R25,8
+000112 e00f                      	LDI R16,0x0F
+000113 b90a                      	OUT DDRD,R16
+000114 ef00                      	LDI R16,0xF0
+000115 b90b                      	OUT PORTD,R16
+000116 0000                      	NOP
                                  
-                                 	;RJMP endReading
-000088 cfce                      	RJMP InitKeyboard
-                                 left:
-                                 	; Configure input pin PB0 
-000089 ef0f                      	LDI R16,0xFF
-00008a b90a                      	OUT DDRD,R16
-00008b 0000                      	NOP
-00008c b90b                      	OUT PORTD,R16
-00008d 0000                      	NOP
+000117 9b4d                      	SBIS PIND,5
+000118 e092                      	LDI direction,2
+000119 9b4f                      	SBIS PIND,7
+00011a e098                      	LDI direction,8
                                  
-00008e e00f                      	LDI R16,0x0F
-00008f b90a                      	OUT DDRD,R16
-000090 0000                      	NOP
-000091 ef00                      	LDI R16,0xF0
-000092 b90b                      	OUT PORTD,R16
-000093 0000                      	NOP
+00011b cfda                      	RJMP InitKeyboard
                                  
-000094 9b4e                      	SBIS PIND,6
-000095 e094                      	LDI R25,4
-                                 	;RJMP endReading
-000096 cfc0                      	RJMP InitKeyboard
+                                 left :
+00011c ef0f                      	LDI R16,0xFF
+00011d b90a                      	OUT DDRD,R16
+00011e b90b                      	OUT PORTD,R16
+                                 
+00011f e00f                      	LDI R16,0x0F
+000120 b90a                      	OUT DDRD,R16
+000121 ef00                      	LDI R16,0xF0
+000122 b90b                      	OUT PORTD,R16
+000123 0000                      	NOP
+                                 
+000124 9b4e                      	SBIS PIND,6
+000125 e094                      	LDI direction,4
+                                 
+000126 cfcf                      	RJMP InitKeyboard
                                  
                                  
                                  moveRight:
                                  	; Horisontal movement----------------------------------
-                                 	;checkPast:
-000097 9517                      	ROR R17							; Horisontal diplacement
-000098 f4b8                      	BRCC isZero
+000127 9517                      	ROR bytesnake							; Horisontal diplacement
+000128 f4b8                      	BRCC isZero
                                  	/* 
                                  	The carry bit is set so we've got to change the rectangle to the one on the right 
                                  	*/
-000099 8310                      	ST Z,R17						; Write R17 to the current Z
-00009a 9517                      	ROR R17							; Rotating R17 here puts back the carry into the bit sequence
-00009b e421                      	LDI R18,65						; We've got to check if we reached the screen boundary
+                                 
+000129 8310                      	ST Z,bytesnake						; Write R17 to the current Z
+00012a 9517                      	ROR bytesnake							; Rotating R17 here puts back the carry into the bit sequence
+00012b e401                      	LDI R16,65						; We've got to check if we reached the screen boundary
                                  	CheckWall5:
-00009c 17e2                      	CP ZL,R18
-00009d f421                      	BRNE notLineX5
-00009e 9634                      	ADIW Z,4
-00009f 8310                      	ST Z,R17
-0000a0 9488                      	CLC
-0000a1 c058                      	RJMP notDown
+00012c 17e0                      		CP ZL,R16
+00012d f421                      		BRNE notLineX5
+00012e 9634                      	ADIW Z,4
+00012f 8310                      	ST Z,bytesnake
+000130 9488                      	CLC
+000131 c056                      	RJMP notDown
                                  	notLineX5:
-0000a2 502a                      	SUBI R18,10
-0000a3 f7c4                      	BRGE CheckWall5
                                  
-0000a4 e32c                      	LDI R18,60
+000132 500a                      		SUBI R16,10
+000133 f7c4                      		BRGE CheckWall5
+000134 e406                      	LDI R16,70
+                                 
                                  	CheckWall0:
-0000a5 17e2                      	CP ZL,R18
-0000a6 f421                      	BRNE notLineX0
-0000a7 9634                      	ADIW Z,4
-0000a8 8310                      	ST Z,R17
-0000a9 9488                      	CLC
-0000aa c04f                      	RJMP notDown
+000135 17e0                      		CP ZL,R16
+000136 f421                      		BRNE notLineX0
+000137 9634                      	ADIW Z,4
+000138 8310                      	ST Z,bytesnake
+000139 9488                      	CLC
+00013a c04d                      	RJMP notDown
                                  	notLineX0:
-0000ab 502a                      	SUBI R18,10
-0000ac f7c4                      	BRGE CheckWall0
-0000ad 9312                      	ST -Z,R17
-0000ae 9488                      	CLC
-0000af c04a                      	RJMP notDown
+00013b 500a                      		SUBI R16,10
+00013c f7c4                      		BRGE CheckWall0
+00013d 9312                      	ST -Z,bytesnake
+00013e 9488                      	CLC
+00013f c048                      	RJMP notDown
                                  	isZero:
-0000b0 8310                      	ST Z,R17							; Horisontal diplacement
-                                 	
-                                 	
-                                 	
-                                 	/*;SBIW Z,1
-                                 	MOV R18,ZL
-                                 	ADIW Z,1
-                                 	LD R17,Z
-                                 	ROR R17
-                                 	BRCC noPast
-                                 	MOV ZL,R18
-                                 	LD R17,Z
-                                 	ORI R17,0x80
-                                 	ST Z,R17
-                                 	noPast:
-                                 	LDI ZH,0x01
-                                 	MOV ZL,R18
-                                 	LD R17,Z*/
-                                 
-                                 
-                                 
-                                 
-                                 
-                                 
-                                 	;RJMP checkPast
-                                 
-                                 
-                                 
-0000b1 c048                      	RJMP notDown
+000140 8310                      		ST Z,bytesnake							; Horisontal diplacement
+000141 c046                      		RJMP notDown
                                  	;------------------------------------------------------
                                  
                                  moveLeft:
                                  	; Horisontal movement----------------------------------
-0000b2 1f11                      	ROL R17							; Horisontal diplacement
-0000b3 f4c0                      	BRCC noCarry
-0000b4 8310                      	ST Z,R17
-0000b5 1f11                      	ROL R17
+000142 1f11                      	ROL bytesnake							; Horisontal diplacement
+000143 f4c0                      	BRCC noCarry
+000144 8310                      	ST Z,bytesnake
+000145 1f11                      	ROL bytesnake
                                  	
-0000b6 e425                      	LDI R18,69
+000146 e405                      	LDI R16,69
                                  	CheckWall9:
-0000b7 17e2                      	CP ZL,R18
-0000b8 f421                      	BRNE notLineX9
-0000b9 9734                      	SBIW Z,4
-0000ba 8310                      	ST Z,R17
-0000bb 9488                      	CLC
-0000bc c03d                      	RJMP notDown
+000147 17e0                      		CP ZL,R16
+000148 f421                      		BRNE notLineX9
+000149 9734                      	SBIW Z,4
+00014a 8310                      	ST Z,bytesnake
+00014b 9488                      	CLC
+00014c c03b                      	RJMP notDown
                                  	notLineX9:
-0000bd 502a                      	SUBI R18,10
-0000be f7c4                      	BRGE CheckWall9
+00014d 500a                      		SUBI R16,10
+00014e f7c4                      		BRGE CheckWall9
                                  
-0000bf e420                      	LDI R18,64
+                                 
+00014f e400                      	LDI R16,64
+                                 
                                  	CheckWall4:
-0000c0 17e2                      	CP ZL,R18
-0000c1 f421                      	BRNE notLineX4
-0000c2 9734                      	SBIW Z,4
-0000c3 8310                      	ST Z,R17
-0000c4 9488                      	CLC
-0000c5 c034                      	RJMP notDown
+000150 17e0                      		CP ZL,R16
+000151 f421                      		BRNE notLineX4
+000152 9734                      	SBIW Z,4
+000153 8310                      	ST Z,bytesnake
+000154 9488                      	CLC
+000155 c032                      	RJMP notDown
                                  	notLineX4:
-0000c6 502a                      	SUBI R18,10
-0000c7 f7c4                      	BRGE CheckWall4
-0000c8 9631                      	ADIW Z,1
-0000c9 8310                      	ST Z,R17
-0000ca 9488                      	CLC
-0000cb c02e                      	RJMP notDown
+000156 500a                      		SUBI R16,10
+000157 f7c4                      		BRGE CheckWall4
+000158 9631                      	ADIW Z,1
+000159 8310                      	ST Z,bytesnake
+00015a 9488                      	CLC
+00015b c02c                      	RJMP notDown
                                  	noCarry:
-0000cc 8310                      	ST Z,R17							; Horisontal diplacement
-0000cd c02c                      	RJMP notDown
+00015c 8310                      		ST Z,bytesnake							; Horisontal diplacement
+00015d c02a                      		RJMP notDown
                                  	;------------------------------------------------------
                                  
                                  Timer2OverflowInterrupt:
-0000ce 936f                      	PUSH R22
-0000cf 937f                      	PUSH R23
-0000d0 93cf                      	PUSH YL
-0000d1 955a                      	DEC R21								; Decrement the counter
-0000d2 f539                      	BRNE notDown						; Since the interrupt happens to often we add a counter which makes it proceed to the code every 10 times.
-0000d3 e05a                      	LDI R21,10
-0000d4 e0f1                      	LDI ZH,0x01
+00015e 9518                      RETI
                                  
-0000d5 3096                      	CPI R25,6
-0000d6 f409                      	BRNE notRight
-0000d7 cfbf                      	RJMP moveRight
+                                 Timer1OverflowInterrupt:
+                                 /*
+                                 This interrupt moves the spread.
+                                 */
+00015f 93cf                      	PUSH YL
+000160 930f                      	PUSH R16
+000161 933f                      	PUSH R19
+                                 	
+000162 e0f1                      	LDI ZH,0x01
+                                 
+000163 3096                      	CPI direction,6
+000164 f409                      	BRNE notRight
+000165 cfc1                      	RJMP moveRight
                                  	
                                  	notRight:
-                                 
-0000d8 3094                      	CPI R25,4
-0000d9 f409                      	BRNE notLeft
-0000da cfd7                      	RJMP moveLeft
+000166 3094                      		CPI direction,4
+000167 f409                      		BRNE notLeft
+000168 cfd9                      	RJMP moveLeft
                                  
                                  	notLeft:
+000169 3098                      		CPI direction,8
+00016a f471                      		BRNE notUp
                                  
-0000db 3098                      	CPI R25,8
-0000dc f471                      	BRNE notUp
                                  	;Vertical movement-------------------------------
-0000dd e020                      	LDI R18,0
-0000de 8320                      	ST Z,R18							; Set Z to 0
+00016b e000                      	LDI R16,0
+00016c 8300                      	ST Z,R16							; Set Z to 0
                                  
-0000df 2f3e                      	MOV R19,ZL
-0000e0 33ec                      	CPI ZL,60							; Compare ZL to 70 if higher then change the rect
-0000e1 f028                      	BRLO ChangeRectUp
-0000e2 e421                      	LDI R18,65
-0000e3 1be2                      	SUB ZL,R18							;Subtract 65 from ZL but don't worry we add 10 at the end!
-0000e4 3431                      	CPI R19,65							;Compare the original ZL with 75 to see if we are at the top of the screen
-0000e5 f008                      	BRLO ChangeRectUp
-                                 	;LDI R18,10
-0000e6 973a                      	SBIW ZL,10
-                                 	ChangeRectUp:
-0000e7 963a                      	ADIW ZL,10							; Subtract 10 from Z
-0000e8 e0f1                      	LDI ZH,0x01
-0000e9 8310                      	ST Z,R17
-0000ea c00f                      	RJMP notDown
+00016d 2f3e                      	MOV R19,ZL
+00016e 33ec                      	CPI ZL,60							; Compare ZL to 60 if higher then change the rect
+00016f f028                      	BRLO ChangeBlockUp
+000170 e401                      	LDI R16,65
+000171 1be0                      	SUB ZL,R16							;Subtract 65 from ZL but don't worry we add 10 at the end!
+000172 3431                      	CPI R19,65							;Compare the original ZL with 75 to see if we are at the top of the screen
+000173 f008                      	BRLO ChangeBlockUp
+000174 973a                      	SBIW ZL,10
+                                 	ChangeBlockUp:
+000175 963a                      		ADIW ZL,10						; Subtract 10 from Z
+000176 e0f1                      		LDI ZH,0x01
+000177 8310                      		ST Z,bytesnake
+000178 c00f                      	RJMP notDown
                                  	;------------------------------------------------
                                  	notUp:
-                                 
-0000eb 3092                      	CPI R25,2
-0000ec f469                      	BRNE notDown
+000179 3092                      		CPI direction,2
+00017a f469                      		BRNE notDown
                                  	;Vertical movement-------------------------------
-0000ed e020                      	LDI R18,0
-0000ee 8320                      	ST Z,R18							; Set Z to 0
+00017b e000                      	LDI R16,0
+00017c 8300                      	ST Z,R16							; Set Z to 0
                                  
-0000ef 2f3e                      	MOV R19,ZL							; Value of ZL to R19
-0000f0 30ea                      	CPI ZL,10							; Compare ZL to 20 if smaller then change the rect
-0000f1 f428                      	BRSH ChangeRect
-0000f2 e421                      	LDI R18,65						
-0000f3 0fe2                      	ADD ZL,R18							;Adding 65 to ZL since it is lower than 20
-0000f4 3035                      	CPI R19,5							;Compare the original ZL with 15 to see if we are at the bottom of the screen
-0000f5 f408                      	BRSH ChangeRect
-                                 	;LDI R18,10
-0000f6 963a                      	ADIW ZL,10							;We're at the bottom so ZL = ZL + 65 + 10
-                                 	ChangeRect:
-0000f7 973a                      	SBIW ZL,10							; Subtract 10 from Z
-0000f8 e0f1                      	LDI ZH,0x01
-0000f9 8310                      	ST Z,R17
+00017d 2f3e                      	MOV R19,ZL							; Value of ZL to R19
+00017e 30ea                      	CPI ZL,10							; Compare ZL to 10 if smaller then change the rect
+00017f f428                      	BRSH ChangeBlock
+000180 e401                      	LDI R16,65						
+000181 0fe0                      	ADD ZL,R16							;Adding 65 to ZL since it is lower than 20
+000182 3035                      	CPI R19,5							;Compare the original ZL with 5 to see if we are at the bottom of the screen
+000183 f408                      	BRSH ChangeBlock
+000184 963a                      	ADIW ZL,10							;We're at the bottom so ZL = ZL + 65 + 10
+                                 	ChangeBlock:
+000185 973a                      		SBIW ZL,10							; Subtract 10 from Z
+000186 e0f1                      		LDI ZH,0x01
+000187 8310                      		ST Z,bytesnake
                                  
                                  	;------------------------------------------------
                                  	notDown:
                                  	/*
                                  	This small section is responisible for eating an obstacle/object.
                                  	*/
-0000fa 2fce                      	MOV YL,ZL
-0000fb 8168                      	LD R22,Y
-0000fc 1b61                      	SUB R22,R17
-0000fd f409                      	BRNE noOnObstacle
-0000fe 8368                      	ST Y,R22
-                                 	noOnObstacle:
-0000ff 91cf                      	POP YL
-000100 917f                      	POP R23
-000101 916f                      	POP R22
-000102 9518                      	RETI
+000188 2fce                      	MOV YL,ZL
+000189 8138                      	LD R19,Y
+00018a 1b31                      	SUB R19,bytesnake
+00018b f4d9                      	BRNE noOnFood
+00018c 8338                      	ST Y,R19
+                                 	; Updating the score
+00018d e001                      	LDI R16,1
+00018e 0f50                      	ADD score,R16
+                                 
+                                 	; Turning up the speed
+00018f e00f                      	LDI R16,15
+000190 ef30                      	LDI R19,0xF0
+000191 1363                      	CPSE speed,R19						; Compare, Skip if Equal -> so we reached maximum speed
+000192 0f60                      	ADD speed,R16
+                                 
+000193 913f                      	POP R19
+000194 910f                      	POP R16
+000195 91cf                      	POP YL                      
+                                 	LSFR270new :
+000196 2f07                      		MOV R16, random                 ; Clone random to R16                    ex : R16 = 0b01111110
+000197 2f37                      		MOV R19, random                 ; Clone random to R19                         R17 = 0b01111110
+000198 9576                      		LSR random                      ; Shift to the right random                   random = 0b00111111
+000199 fb00                      		BST R16,0					    ; Take the first bit of R16                   T = 0
+00019a f976                      		BLD random,6                    ; Put this at seventh place of random         random = 0b00111111
+00019b f936                      		BLD R19,6                       ; Same for R19                                R17 = 0b00111110
+00019c 2730                      		EOR R19,R16                     ; R19 = R16 xor R19                           R17 = 0b01000000
+00019d fb36                      		BST R19,6                       ; Take the seventh bit of R19                 T = 1
+00019e f975                      		BLD random,5                    ; Put this at the sixth place of random       random = 0b00111111
+                                 	generatenew :
+00019f 7f7f                      		ANDI random,0b011111111         ; We want a random number < 70 => we need 7 bits => random,7 = 0
+0001a0 3476                      		CPI random,70                   ; Compare random register to 70
+0001a1 f7a0                      		BRSH LSFR270new                    ; If it's equal or bigger than 70 use LSFR
+                                 	foodnew :
+0001a2 e0c0                      		LDI YL,0x00                     ; Begin Y = 0x0200
+0001a3 0fc7                      		ADD YL,random				    ; Add it the random number smaller than 70
+0001a4 e820                      		LDI bytefood, 0x80                   ; Set one bit on the byte
+0001a5 8318                      		ST Y,bytesnake			      	    ; Put the value pointed by Y
+0001a6 9518                      	RETI
+                                 	noOnFood:
+                                 		;Setting the TCNT1 value at 1Hz -> TCNT1  = 49911
+0001a7 ef0f                      		LDI R16,0xFF	
+0001a8 9360 0085                 		STS TCNT1H,speed
+0001aa 9300 0084                 		STS TCNT1L,R16
+                                 
+0001ac 913f                      		POP R19
+0001ad 910f                      		POP R16
+0001ae 91cf                      		POP YL
+0001af 9518                      		RETI
                                  
                                  Timer0OverflowInterrupt:
-                                 
                                  /*
                                  The goal of the interrupt is to refresh the screen,
                                  */
-                                 
                                  ;Initialising Z
-000103 930f                      PUSH R16
-000104 931f                      PUSH R17						;save R17 on the stack
-000105 932f                      PUSH R18
-000106 933f                      PUSH R19
-000107 93ef                      PUSH ZL
-000108 93cf                      PUSH YL
-                                 
+0001b0 930f                      PUSH R16
+0001b1 931f                      PUSH R17						;save R17 on the stack
+0001b2 932f                      PUSH R18
+0001b3 933f                      PUSH R19
+0001b4 936f                      PUSH R22
+0001b5 93ef                      PUSH ZL
+0001b6 93cf                      PUSH YL
                                  /* 
                                  We use 2 poiners registers for the screen Z contains the snake while Y the object the snake can eat.
                                  */
+0001b7 e0e0                      LDI ZL,0x00
+0001b8 e0f1                      LDI ZH,0x01						;init Z to point do address 0x0100
+0001b9 9111                      LD R17,Z+						;write value from address pointed by Z to Ra and auto-increse Z pointer
                                  
-000109 e0e0                      LDI ZL,0x00
-00010a e0f1                      LDI ZH,0x01						;init Z to point do address 0x0100
-00010b 9111                      LD R17,Z+						;write value from address pointed by Z to Ra and auto-increse Z pointer
-                                 
-00010c e0c0                      LDI YL,0x00
-00010d e0d2                      LDI YH,0x02						;init Z to point do address 0x0100
-00010e 9129                      LD R18,Y+						;write value from address pointed by Z to Ra and auto-increse Z pointer
-                                 
+0001ba e0c0                      LDI YL,0x00
+0001bb e0d2                      LDI YH,0x02						;init Z to point do address 0x0100
+0001bc 9129                      LD R18,Y+						;write value from address pointed by Z to Ra and auto-increse Z pointer
                                  
                                  ;Rows counter
-00010f e062                      LDI R22,0x02
-                                 ;lDI R22,0
-                                 ;LDI R19,7
+0001bd e062                      LDI R22,0x02
                                  
                                  Send1Row:
-                                     ;CPI R22,0x80
-                                 	;BRNE pa
-                                 	;LDI R22,0x01
-                                 	;pa:
-                                 
                                  	;Byte counter
-000110 e048                      	LDI R20,8
+0001be e048                      	LDI R20,8
                                  	;Columns counter
-000111 e500                      	LDI R16,80	
-000112 9488                      	CLC
+0001bf e500                      	LDI R16,80	
+0001c0 9488                      	CLC
                                  	COLUMNS:
-000113 982b                      	CBI PORTB,3							;Set PB3 low
-000114 9517                      	ROR R17								;Rotate R17 right througth carry
-000115 f408                      	BRCC NOPB3							;Branch if carry is 0
-000116 9a2b                      	SBI PORTB,3							;carry is 1 => set PB3 high
-                                 NOPB3:
-000117 9527                      	ROR R18								;Rotate R18 right througth carry
-000118 f408                      	BRCC noObstacle							;Branch if carry is 0
-000119 9a2b                      	SBI PORTB,3							;carry is 1 => set PB3 high
-                                 
-                                 noObstacle:
-00011a 982d                      	CBI PORTB,5							;Set PB5 low
-00011b 9a2d                      	SBI PORTB,5							;Set PB5 high
-00011c 954a                      	DEC R20
-00011d f419                      	BRNE CONTINUE						;Branch if not all the bits have been analysed
+0001c1 982b                      		CBI PORTB,3							;Set PB3 low
+0001c2 9517                      		ROR R17								;Rotate R17 right througth carry
+0001c3 f408                      		BRCC NOPB3							;Branch if carry is 0
+0001c4 9a2b                      		SBI PORTB,3							;carry is 1 => set PB3 high
+                                 	NOPB3:
+0001c5 9527                      		ROR R18								;Rotate R18 right througth carry
+0001c6 f420                      		BRCC noObstacle							;Branch if carry is 0
+0001c7 5081                      		SUBI toggle,1
+0001c8 f411                      		BRNE noObstacle
+0001c9 9a2b                      		SBI PORTB,3							;carry is 1 => set PB3 high
+0001ca e083                      		LDI toggle,3
+                                 	
+                                 	noObstacle:
+0001cb 982d                      		CBI PORTB,5							;Set PB5 low
+0001cc 9a2d                      		SBI PORTB,5							;Set PB5 high
+0001cd 954a                      		DEC R20
+0001ce f419                      		BRNE CONTINUE						;Branch if not all the bits have been analysed
                                  								
-00011e e048                      	LDI R20,8
-00011f 9111                      	LD R17,Z+							;write value from address pointed by Z to Ra and auto-increse Z pointer
-000120 9129                      	LD R18,Y+
-                                 CONTINUE:
-000121 950a                      	DEC R16
-000122 f781                      	BRNE COLUMNS
+0001cf e048                      	LDI R20,8
+0001d0 9111                      	LD R17,Z+							;write value from address pointed by Z to Ra and auto-increse Z pointer
+0001d1 9129                      	LD R18,Y+
                                  
-000123 e008                      LDI R16,8	;Rows counter
-000124 9488                      CLC
-                                 ROWS:
-000125 982b                      	CBI PORTB,3							;Set PB3 low
-000126 9567                      	ROR R22								;Rotate R22 right througth carry
-000127 f408                      	BRCC NOONE							;Branch if carry is 0
-000128 9a2b                      	SBI PORTB,3							;carry is 1 => set PB3 high
-                                 NOONE:
-000129 982d                          CBI PORTB,5							;Set PB5 low
-00012a 9a2d                      	SBI PORTB,5							;Set PB5 high
-00012b 950a                      	DEC R16
-00012c f7c1                      	BRNE ROWS
+                                 	CONTINUE:
+0001d2 950a                      		DEC R16
+0001d3 f769                      		BRNE COLUMNS
+                                 
+0001d4 e008                      	LDI R16,8	;Rows counter
+0001d5 9488                      	CLC
+                                 	ROWS:
+0001d6 982b                      		CBI PORTB,3							;Set PB3 low
+0001d7 9567                      		ROR R22								;Rotate R22 right througth carry
+0001d8 f408                      		BRCC NOONE							;Branch if carry is 0
+0001d9 9a2b                      		SBI PORTB,3							;carry is 1 => set PB3 high
+                                 	NOONE:
+0001da 982d                      		CBI PORTB,5							;Set PB5 low
+0001db 9a2d                      		SBI PORTB,5							;Set PB5 high
+0001dc 950a                      		DEC R16
+0001dd f7c1                      		BRNE ROWS
                                  	
-                                 notRow8:
-00012d 982c                      CBI PORTB,4								;Set PB4 low
-00012e 9a2c                      SBI PORTB,4								;Set PB4 high
-                                 ;Delay
-                                 ;PB4 delay parameters
-00012f e002                      LDI R16,2
-000130 ef4f                      LDI R20,255
+                                 	notRow8:
+0001de 982c                      		CBI PORTB,4								;Set PB4 low
+0001df 9a2c                      		SBI PORTB,4								;Set PB4 high
                                  
-000131 e079                      LDI R23,9								;Setting up the delay between SBI PB4 and CBI PB4
-000132 ef8f                      LDI R24,255
-                                 time1:
-                                 	time2:
-000133 957a                      		DEC R23
-000134 f7f1                      		BRNE time2
-000135 e079                      		LDI R23,9
-000136 958a                      	DEC R24
-000137 f7d9                      	BRNE time1
-000138 ef8f                      	LDI R24,255
+                                 	;PB4 delay parameters
+0001e0 e009                      	LDI R16,9								;Setting up the delay between SBI PB4 and CBI PB4
+0001e1 ef4f                      	LDI R20,255
+                                 	time1:
+                                 		time2:
+0001e2 950a                      			DEC R16
+0001e3 f7f1                      			BRNE time2
+0001e4 e009                      			LDI R16,9
+0001e5 954a                      		DEC R20
+0001e6 f7d9                      	BRNE time1
+0001e7 ef4f                      	LDI R20,255
+0001e8 982c                      	CBI PORTB,4								;Set PB4 low
                                  
-000139 982c                      CBI PORTB,4								;Set PB4 low
+0001e9 2366                      	TST R22									;Check if R22 = 0x00
+0001ea f699                      	BRNE Send1Row							;If R22 != 0x00 plot next row if not, stop the time interrupt
+0001eb 91cf                      	POP YL
+0001ec 91ef                      	POP ZL
+0001ed 916f                      	POP R22
+0001ee 913f                      	POP R19
+0001ef 912f                      	POP R18
+0001f0 911f                      	POP R17									;restore R17 from the stack
+0001f1 910f                      	POP R16
+0001f2 9488                      	CLC
+0001f3 9518                      	RETI
                                  
-00013a 2366                      TST R22									;Check if R22 = 0x00
-00013b f6a1                      BRNE Send1Row							;If R22 != 0x00 plot next row if not, stop the time interrupt
-                                 ;ROL R22
-00013c 91cf                      POP YL
-00013d 91ef                      POP ZL
-00013e 913f                      POP R19
-00013f 912f                      POP R18
-000140 911f                      POP R17									;restore R17 from the stack
-000141 910f                      POP R16
-000142 9488                      CLC
-000143 9518                      RETI
-                                 ;RJMP Send1Row
-                                 
-                                 
-                                 	
-                                 
-                                 
-                                 
-                                 
-                                 
-                                 
-                                 
-                                 /*;Read data from screenbuffer for one row----------------------------------------------------------------
-                                 LDI ZL,0x00
-                                 LDI ZH,0x01						;init Z to point do address 0x0100
-                                 
-                                 LDI R21,70						;need to write 70 bytes to fill the whole screenbuffer
-                                 ReadByteFromScreenbuffer:
-                                 LD R17,Z+						;write value from address pointed by Z to Ra and auto-increse Z pointer
-                                 DEC R21
-                                 BRNE ReadByteFromScreenbuffer	;write 70 bytes
-                                 ;-------------------------------------------------------------------------------------------------------
-                                 */
-                                 
-                                 
-                                 
-                                 
-                                 
-                                 
-                                 /*;Send data to screenbuffer
-                                 LDI ZL,0x00						; ZL is the register R30
-                                 LDI ZH,0x01						;init Z to point do address 0x0100----------ZH is the register R31
-                                 LDI Ra ,0x55					;we will write this value to every byte of the whole screenbuffer
-                                 
-                                 LDI Rb,70						;need to write 70 bytes to fill the whole screenbuffer
-                                 WriteByteToScreenbuffer:
-                                 ST Z+,Ra						;write value from Ra to address pointed by Z and auto-increse Z pointer
-                                 DEC Rb
-                                 BRNE WriteVyteToScreenbuffer	;write 70 bytes
-                                 
-                                 ;Read data from screenbuffer for one row
-                                 LDI ZL,0x00
-                                 LDI ZH,0x01						;init Z to point do address 0x0100
-                                 
-                                 LDI Rb,70						;need to write 70 bytes to fill the whole screenbuffer
-                                 WriteByteToScreenbuffer:
-                                 LD Ra,Z+						;write value from address pointed by Z to Ra and auto-increse Z pointer
-                                 DEC Rb
-                                 BRNE WriteVyteToScreenbuffer	;write 70 bytes
-                                 */
-                                 
-                                 
-                                 ;-------------------------------------------------------------
-                                 
-                                 
-                                 /*INIT:
-                                 	LDI R16,0b00000000	; Load Immediate
-                                 	LDI R18,10
-                                 	CBI DDRB,5			; Clear Bit in I/O Register
-                                 	CBI DDRB,4
-                                 ;LOOP: 80 COL
-                                 ROW:
-                                 	CPI R18,0			; Compare Register with Immediate
-                                 	BREQ SEND
-                                 	DEC R18				; Decrement
-                                 	MOV R17,R16
-                                 	ROL R17		;Rotate Left Through Carry
-                                 	CBI DDRB,3	;PB3
-                                 	BRCC LABEL	;Branch if Carry Cleared
-                                 	SBI DDRB,3	;PB3
-                                 	
-                                 LABEL:
-                                 	SBI DDRB,5	;PB5
-                                 	CBI DDRB,5	
-                                 	JMP ROW
-                                 
-                                 LDI R19,8
-                                 LOOP:
-                                 	
-                                 	
-                                 SEND:
-                                 	SBI DDRB,4	;PB4
-                                 	CBI DDRB,4
-                                 	JMP INIT
-                                 
+                                 CharTable:
+0001f4 0000
+0001f5 0000
+0001f6 0000
+0001f7 0000                      .db 0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000 ;nothing => 0
+0001f8 0a04
+0001f9 1111
+0001fa 111f
+0001fb 0011                      .db 0b00000100,0b00001010,0b00010001,0b00010001,0b00011111,0b00010001,0b00010001,0b00000000 ;A => 1
+0001fc 101f
+0001fd 1f10
+0001fe 1010
+0001ff 001f                      .db 0b00011111,0b00010000,0b00010000,0b00011111,0b00010000,0b00010000,0b00011111,0b00000000 ;E => 2
+000200 111f
+000201 1f11
+000202 1010
+000203 0010                      .db 0b00011111,0b00010001,0b00010001,0b00011111,0b00010000,0b00010000,0b00010000,0b00000000 ;P => 3
+000204 111f
+000205 1f11
+000206 1214
+000207 0011                      .db 0b00011111,0b00010001,0b00010001,0b00011111,0b00010100,0b00010010,0b00010001,0b00000000 ;R => 4
+000208 101f
+000209 1f10
+00020a 0101
+00020b 001f                      .db 0b00011111,0b00010000,0b00010000,0b00011111,0b00000001,0b00000001,0b00011111,0b00000000 ;S => 5
+00020c 041f
+00020d 0404
+00020e 0404
 
 
 RESOURCE USE INFORMATION
@@ -1638,39 +1771,39 @@ counted separately from r26..r31 here.
 .dseg memory usage only counts static data declared with .byte
 
 "ATmega328P" register use summary:
-x  :   1 y  :   6 z  :  23 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+x  :   1 y  :  19 z  :  24 r0 :   1 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:  39 r17:  36 r18:  27 r19:   9 r20:   4 
-r21:   9 r22:   8 r23:   6 r24:   3 r25:   9 r26:   1 r27:   1 r28:   8 
-r29:   3 r30:  20 r31:   6 
-Registers used: 19 out of 35 (54.3%)
+r13:   0 r14:   0 r15:   0 r16: 119 r17:  32 r18:  11 r19:  32 r20:  12 
+r21:  37 r22:  13 r23:  20 r24:   3 r25:   9 r26:   1 r27:   1 r28:  14 
+r29:   4 r30:  22 r31:   7 
+Registers used: 20 out of 35 (57.1%)
 
 "ATmega328P" instruction use summary:
-.lds  :   0 .sts  :   0 adc   :   0 add   :   1 adiw  :   5 and   :   0 
-andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   5 brcs  :   0 break :   0 breq  :   0 brge  :   4 brhc  :   0 
+.lds  :   0 .sts  :   0 adc   :   1 add   :   7 adiw  :   5 and   :   0 
+andi  :   2 asr   :   0 bclr  :   0 bld   :   6 brbc  :   0 brbs  :   0 
+brcc  :   8 brcs  :   0 break :   0 breq  :   2 brge  :   4 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   2 brlt  :   0 brmi  :   0 
-brne  :  19 brpl  :   0 brsh  :   2 brtc  :   0 brts  :   0 brvc  :   0 
-brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   8 cbr   :   0 
+brne  :  26 brpl  :   0 brsh  :   4 brtc  :   0 brts  :   2 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   4 call  :   0 cbi   :  17 cbr   :   0 
 clc   :   9 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
-clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   4 cpc   :   0 
-cpi   :   8 cpse  :   0 dec   :   9 eor   :   0 fmul  :   0 fmuls :   0 
+clt   :   1 clv   :   0 clz   :   0 com   :   0 cp    :   4 cpc   :   0 
+cpi   :  11 cpse  :   1 dec   :  17 eor   :   2 fmul  :   0 fmuls :   0 
 fmulsu:   0 icall :   0 ijmp  :   0 in    :   0 inc   :   0 jmp   :   0 
-ld    :   5 ldd   :   0 ldi   :  70 lds   :   0 lpm   :   0 lsl   :   0 
-lsr   :   0 mov   :   3 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :  16 or    :   0 ori   :   0 out   :  19 pop   :   9 
-push  :   9 rcall :   0 ret   :   0 reti  :   2 rjmp  :  21 rol   :   2 
-ror   :   5 sbc   :   0 sbci  :   0 sbi   :  11 sbic  :   0 sbis  :   7 
+ld    :   6 ldd   :   0 ldi   : 118 lds   :   0 lpm   :   2 lsl   :   0 
+lsr   :   3 mov   :   9 movw  :   0 mul   :   1 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   4 or    :   0 ori   :   0 out   :  31 pop   :  13 
+push  :  10 rcall :   0 ret   :   0 reti  :   4 rjmp  :  33 rol   :   3 
+ror   :   6 sbc   :   0 sbci  :   0 sbi   :  17 sbic  :   0 sbis  :   9 
 sbiw  :   4 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
-sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
-sez   :   0 sleep :   0 spm   :   0 st    :  20 std   :   0 sts   :   4 
-sub   :   2 subi  :   4 swap  :   0 tst   :   1 wdr   :   0 
-Instructions used: 31 out of 113 (27.4%)
+sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   2 sev   :   0 
+sez   :   0 sleep :   0 spm   :   0 st    :  32 std   :   0 sts   :  11 
+sub   :   2 subi  :   5 swap  :   0 tst   :   1 wdr   :   0 
+Instructions used: 44 out of 113 (38.9%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000288    588      0    588   32768   1.8%
+[.cseg] 0x000000 0x000420    942     56    998   32768   3.0%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 
