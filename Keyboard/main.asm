@@ -16,14 +16,14 @@ RJMP Timer0OverflowInterrupt
 PRESSstart :
 	LDI YL,0x00
 	LDI YH,0x01
-
-	LDI R16,3         ;P
+	LDI R16,0b00
+	LDI R16,6         ;P
 	ST Y+,R16		  
-	LDI R16,4		  ;R
+	LDI R16,7		  ;R
 	ST Y+,R16
 	LDI R16,2		  ;E
 	ST Y+,R16
-	LDI R16,5		  ;S
+	LDI R16,8		  ;S
 	ST Y+,R16
 	ST Y+,R16         ;S
 	LDI R16,0
@@ -32,15 +32,15 @@ PRESSstart :
 		ST Y+,R16
 		DEC R17
 	BRNE loop
-	LDI R16,5         ;S
+	LDI R16,8         ;S
 	ST Y+,R16
-	LDI R16,6         ;T
+	LDI R16,9         ;T
 	ST Y+,R16
 	LDI R16,1         ;A
 	ST Y+,R16
-	LDI R16,4         ;R
+	LDI R16,7         ;R
 	ST Y+,R16
-	LDI R16,6         ;T
+	LDI R16,9         ;T
 	ST Y,R16
 
 init :
@@ -48,6 +48,12 @@ init :
 	LDI R22,200
 	LDI random,255
 	SET
+
+	CBI DDRB,0			    ; Pin PB0 is an input
+	SBI PORTB,0     
+
+	SBI DDRB,1
+	        
 	SBI DDRB,3			    ; Pin PB3 is an output
 	CBI PORTB,3	
 
@@ -194,6 +200,7 @@ RJMP rowon
 
 ; ---------------------------------------------------------------------------------------------------------------------------------------
 ; -------------------------------------------------------- SNAKE ------------------------------------------------------------------------
+
 begin:
 	.DEF direction = R25
 	.DEF counter   = R21
@@ -232,6 +239,114 @@ begin:
 	SBI DDRB,5				; Pin PB5 is an output
 	CBI PORTB,5
 
+;Send maze to screenbuffer------------------------------------------------------------------------------
+LDI XL,0x00						
+LDI XH,0x03						
+LDI R16 ,0x00					
+LDI R19,7						
+WriteMazeToScreenbuffer:
+	ST X+,R16					
+	DEC R19
+	BRNE WriteMazeToScreenbuffer	
+
+
+LDI R16 ,0x10					
+ST X+,R16
+
+
+LDI R16 ,0x00					
+LDI R19,8					
+WriteMazeToScreenbuffer2:		
+	ST X+,R16		
+	DEC R19
+	BRNE WriteMazeToScreenbuffer2	
+
+LDI R16 ,0xFE					
+ST X+,R16	
+
+LDI R16 ,0x1F					
+ST X+,R16	
+
+LDI R16 ,0x00					
+LDI R19,8					
+WriteMazeToScreenbuffer3:		
+	ST X+,R16		
+	DEC R19
+	BRNE WriteMazeToScreenbuffer3
+
+LDI R16 ,0x02					
+ST X+,R16
+
+LDI R16 ,0x10					
+ST X+,R16
+
+LDI R16 ,0x00					
+LDI R19,4					
+WriteMazeToScreenbuffer4:		
+	ST X+,R16		
+	DEC R19
+	BRNE WriteMazeToScreenbuffer4
+
+LDI R16 ,0xF0					
+ST X+,R16
+
+LDI R16 ,0xFF					
+LDI R19,3					
+WriteMazeToScreenbuffer5:		
+	ST X+,R16		
+	DEC R19
+	BRNE WriteMazeToScreenbuffer5
+
+LDI R16 ,0x03					
+ST X+,R16
+
+LDI R16 ,0xF0					
+ST X+,R16
+
+LDI R16 ,0xFF					
+LDI R19,2					
+WriteMazeToScreenbuffer6:		
+	ST X+,R16		
+	DEC R19
+	BRNE WriteMazeToScreenbuffer6
+
+LDI R16 ,0xFF					
+ST X+,R16
+
+LDI R16 ,0x7F					
+ST X+,R16
+
+LDI R16 ,0x10					
+ST X+,R16
+
+LDI R16 ,0x00					
+LDI R19,9					
+WriteMazeToScreenbuffer7:		
+	ST X+,R16		
+	DEC R19
+	BRNE WriteMazeToScreenbuffer7
+
+LDI R16 ,0x10					
+ST X+,R16
+
+LDI R16 ,0x00					
+LDI R19,9					
+WriteMazeToScreenbuffer8:		
+	ST X+,R16		
+	DEC R19
+	BRNE WriteMazeToScreenbuffer8
+
+LDI R16 ,0x10					
+ST X+,R16
+
+LDI R16 ,0x00					
+LDI R19,7					
+WriteMazeToScreenbuffer9:		
+	ST X+,R16		
+	DEC R19
+	BRNE WriteMazeToScreenbuffer9
+
+
 ;Send data to screenbuffer------------------------------------------------------------------------------
 LDI ZL,0x00						; ZL is the register R30------Z = ZL+ZH
 LDI ZH,0x01						; init Z to point do address 0x0100----------ZH is the register R31
@@ -256,7 +371,7 @@ WriteObstacleToScreenbuffer:
 ;-------------------------------------------------------------------------------------------------------
 
 ; Add the move point on the screen at a deterministic place
-LDI ZL,63					    ; Take the position of the byte
+LDI ZL,0					    ; Take the position of the byte
 LDI bytesnake, 0x01                   ; Set one bit on the byte
 ST Z,bytesnake                        ; Put the value pointed by Z
 
@@ -279,9 +394,15 @@ LSFR270 :
 	RJMP generate                   ; Test if the new random is smaller than 70
 
 food :
+	LDI bytefood, 0x80                   ; Set one bit on the byte
+	LDI XL,0x00
+	ADD XL,random
+	LD R25,X
+	AND R25,bytefood
+	CPI R25,0
+	BRNE LSFR270
 	LDI YL,0x00                     ; Begin Y = 0x0200
 	ADD YL,random				    ; Add it the random number smaller than 70
-	LDI bytefood, 0x80                   ; Set one bit on the byte
 	ST Y,bytefood			      	    ; Put the value pointed by Y
 
 LDI direction,6						;Initial direction (right) of the snake
@@ -300,6 +421,8 @@ InitKeyboard:
 	OUT PORTD,R16
 	
 Main:
+	SBIS PIND,0
+	RJMP restart
 	SBIS PIND,1	    
 	RJMP right
 	SBIS PIND,2
@@ -307,6 +430,25 @@ Main:
 	SBIS PIND,3
 	RJMP left
 	RJMP Main
+
+reset :
+	LDI R16,0b10101001
+	STS WDTCSR,R16
+
+restart :
+	LDI R16,0xFF
+	OUT DDRD,R16
+	OUT PORTD,R16				; Transition of PIND
+
+	LDI R16,0x0F
+	OUT DDRD,R16
+	LDI R16,0xF0
+	OUT PORTD,R16
+	NOP
+
+	SBIS PIND,5
+	RJMP reset
+	RJMP InitKeyboard
 
 right:
 	LDI R16,0xFF
@@ -324,7 +466,7 @@ right:
 	
 	RJMP InitKeyboard
 
-upOrDown: 
+upOrDown:
 	LDI R16,0xFF
 	OUT DDRD,R16
 	OUT PORTD,R16
@@ -439,8 +581,10 @@ moveLeft:
 
 Timer2OverflowInterrupt:
 	PUSH YL
+	PUSH XL
 	PUSH R16
 	PUSH R19
+	PUSH R25
 	DEC counter							; Decrement the counter
 	BRNE notDown						; Since the interrupt happens to often we add a counter which makes it proceed to the code every 10 times.
 	LDI counter,10
@@ -502,14 +646,16 @@ Timer2OverflowInterrupt:
 	/*
 	This small section is responisible for eating an obstacle/object.
 	*/
+	MOV XL,ZL
+	LD R19,X
+	AND R19,bytesnake
+	CPI R19,0
+	BRNE Gameover
 	MOV YL,ZL
 	LD R19,Y
 	SUB R19,bytesnake
 	BRNE noOnFood
-	ST Y,R19
-	POP R19
-	POP R16
-	POP YL                      
+	ST Y,R19                     
 	LSFR270new :
 		MOV R16, random                 ; Clone random to R16                    ex : R16 = 0b01111110
 		MOV R19, random                 ; Clone random to R19                         R17 = 0b01111110
@@ -523,18 +669,27 @@ Timer2OverflowInterrupt:
 	generatenew :
 		ANDI random,0b011111111         ; We want a random number < 70 => we need 7 bits => random,7 = 0
 		CPI random,70                   ; Compare random register to 70
-		BRSH LSFR270new                    ; If it's equal or bigger than 70 use LSFR
-	foodnew :
+		BRSH LSFR270new                 ; If it's equal or bigger than 70 use LSFR
+		LDI XL,0x00
+		ADD XL,random
+		LD R25,X
+		AND R25,bytesnake
+		CPI R25,0
+		BRNE LSFR270new 
+	foodnew : 
 		LDI YL,0x00                     ; Begin Y = 0x0200
 		ADD YL,random				    ; Add it the random number smaller than 70
-		LDI bytefood, 0x80                   ; Set one bit on the byte
 		ST Y,bytesnake			      	    ; Put the value pointed by Y
-	RETI
 	noOnFood:
+		POP R25
 		POP R19
 		POP R16
+		POP XL
 		POP YL
 		RETI
+
+Gameover :
+	RJMP mazeGame
 
 Timer0OverflowInterrupt:
 /*
@@ -545,6 +700,7 @@ PUSH R16
 PUSH R17						;save R17 on the stack
 PUSH R18
 PUSH R19
+PUSH R25
 PUSH ZL
 PUSH YL
 /* 
@@ -557,6 +713,10 @@ LD R17,Z+						;write value from address pointed by Z to Ra and auto-increse Z p
 LDI YL,0x00
 LDI YH,0x02						;init Z to point do address 0x0100
 LD R18,Y+						;write value from address pointed by Z to Ra and auto-increse Z pointer
+
+LDI XL,0x00
+LDI XH,0x03						
+LD R25,X+						
 
 ;Rows counter
 LDI R22,0x02
@@ -574,7 +734,11 @@ Send1Row:
 		SBI PORTB,3							;carry is 1 => set PB3 high
 	NOPB3:
 		ROR R18								;Rotate R18 right througth carry
-		BRCC noObstacle							;Branch if carry is 0
+		BRCC maze							;Branch if carry is 0
+		SBI PORTB,3							;carry is 1 => set PB3 high
+	maze:
+		ROR R25								;Rotate R18 right througth carry
+		BRCC noObstacle						;Branch if carry is 0
 		SBI PORTB,3							;carry is 1 => set PB3 high
 	
 	noObstacle:
@@ -586,6 +750,7 @@ Send1Row:
 	LDI R20,8
 	LD R17,Z+							;write value from address pointed by Z to Ra and auto-increse Z pointer
 	LD R18,Y+
+	LD R25,X+
 
 	CONTINUE:
 		DEC R16
@@ -625,6 +790,7 @@ Send1Row:
 	BRNE Send1Row							;If R22 != 0x00 plot next row if not, stop the time interrupt
 	POP YL
 	POP ZL
+	POP R25
 	POP R19
 	POP R18
 	POP R17									;restore R17 from the stack
@@ -632,11 +798,121 @@ Send1Row:
 	CLC
 	RETI
 
+// ---------------------- Game over --------------------------------------------
+mazeGame :
+	LDI XL,0x00
+	LDI XH,0x01
+	LDI R16,3
+	ST X+,R16
+	LDI R16,1
+	ST X+,R16
+	LDI R16,4
+	ST X+,R16
+	LDI R16,2
+	ST X+,R16
+	LDI R16,0
+	LDI R17,4
+	loop1 :
+		ST X+,R16
+		DEC R17
+	BRNE loop1
+		LDI R16,5
+	ST X+,R16
+	LDI R16,10
+	ST X+,R16
+	LDI R16,2
+	ST X+,R16
+	LDI R16,7
+	ST X+,R16
+	LDI R16,0
+	ST X+,R16
+		LDI R16,6
+	ST X+,R16
+	LDI R16,9
+	ST X+,R16
+	LDI R16,8
+	ST X,R16
+
+startGame :
+	LDI R16,6
+	LDI R18,0b01000000
+
+displayGame :
+	LDI XL,0x10
+	LDI XH,0x01
+	LDI R17,8
+	LDI R19,16
+	 
+blocksloopGame :
+	LDI ZL,low(CharTable << 1)
+	LDI ZH,high(CharTable << 1)
+	LD R21,-X
+	MUL R21,R17
+	MOV R21,R0
+	ADD R21,R16
+	ADC ZL,R21
+	BRCC ncGame
+	LDI R21,1
+	ADD ZH,R21
+	ncGame :
+		LPM R21,Z
+		LDI R20,5
+
+blockGame :
+	ROR R21
+	BRCC turnoffGame
+	SBI PORTB,3
+
+turnoffGame :
+	SBI PORTB,5
+	CBI PORTB,5
+	CBI PORTB,3
+	DEC R20
+	BRNE blockGame
+
+DEC R19
+BRNE blocksloopGame
+MOV R21,R18
+
+rowonGame :
+	ROL R21
+	BRCC rowoffGame
+	SBI PORTB,3
+
+rowoffGame :
+	SBI PORTB,5
+	CBI PORTB,5
+	CBI PORTB,3
+	DEC R17
+	BRNE rowonGame
+
+SBI PORTB,4
+LDI R19,255
+LDI R20,9
+wait1Game:
+	wait2Game:
+		DEC R20
+		BRNE wait2Game
+	LDI R20,9
+	DEC R19
+	BRNE wait1Game
+CBI PORTB,4
+
+DEC R16
+LSR R18
+BREQ startGame
+RJMP displayGame
+
 CharTable:
 .db 0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000 ;nothing => 0
 .db 0b00000100,0b00001010,0b00010001,0b00010001,0b00011111,0b00010001,0b00010001,0b00000000 ;A => 1
 .db 0b00011111,0b00010000,0b00010000,0b00011111,0b00010000,0b00010000,0b00011111,0b00000000 ;E => 2
-.db 0b00011111,0b00010001,0b00010001,0b00011111,0b00010000,0b00010000,0b00010000,0b00000000 ;P => 3
-.db 0b00011111,0b00010001,0b00010001,0b00011111,0b00010100,0b00010010,0b00010001,0b00000000 ;R => 4
-.db 0b00011111,0b00010000,0b00010000,0b00011111,0b00000001,0b00000001,0b00011111,0b00000000 ;S => 5
-.db 0b00011111,0b00000100,0b00000100,0b00000100,0b00000100,0b00000100,0b00000100,0b00000000 ;T => 6
+.db 0b00011111,0b00010000,0b00010000,0b00010111,0b00010001,0b00010001,0b00011111,0b00000000 ;G => 3
+.db 0b00010001,0b00011011,0b00010101,0b00010001,0b00010001,0b00010001,0b00010001,0b00000000 ;M => 4
+.db 0b00011111,0b00010001,0b00010001,0b00010001,0b00010001,0b00010001,0b00011111,0b00000000 ;O => 5
+.db 0b00011111,0b00010001,0b00010001,0b00011111,0b00010000,0b00010000,0b00010000,0b00000000 ;P => 6
+.db 0b00011111,0b00010001,0b00010001,0b00011111,0b00010100,0b00010010,0b00010001,0b00000000 ;R => 7
+.db 0b00011111,0b00010000,0b00010000,0b00011111,0b00000001,0b00000001,0b00011111,0b00000000 ;S => 8
+.db 0b00011111,0b00000100,0b00000100,0b00000100,0b00000100,0b00000100,0b00000100,0b00000000 ;T => 9
+.db 0b00010001,0b00010001,0b00010001,0b00010001,0b00010001,0b00001010,0b00000100,0b00000000 ;V => 10
+
