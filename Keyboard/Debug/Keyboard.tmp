@@ -23,7 +23,6 @@
  </OUTPUT_FILES>
  <LABELS>
   <PRESSstart><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>18</LINE></PRESSstart>
-  <Timer2OverflowInterrupt><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>607</LINE></Timer2OverflowInterrupt>
   <Timer1OverflowInterrupt><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>610</LINE></Timer1OverflowInterrupt>
   <Timer0OverflowInterrupt><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>741</LINE></Timer0OverflowInterrupt>
   <loop><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>33</LINE></loop>

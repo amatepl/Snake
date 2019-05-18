@@ -7,8 +7,8 @@
 .INCLUDE "m328pdef.inc"
 .ORG 0x0000 
 RJMP PRESSstart
-.ORG 0x0012
-RJMP Timer2OverflowInterrupt
+;.ORG 0x0012
+;RJMP Timer2OverflowInterrupt
 .ORG 0x001A
 RJMP Timer1OverflowInterrupt
 .ORG 0x0020
@@ -222,8 +222,8 @@ begin:
 	OUT TCCR0B,R16	
 	
 	;Set timer2 with the maximum prescaler
-	LDI R16,7
-	STS TCCR2B,R16
+	;LDI R16,7
+	;STS TCCR2B,R16
 
 	LDI R16,0
 	STS PRR,R16
@@ -242,9 +242,9 @@ begin:
 	STS TCNT1H,R19
 	STS TCNT1L,R16
 
-	;Setting the TCNT0 with the maximum value to have the lowest frequency
-	LDI R16,255
-	STS TCNT2,R16
+	;Setting the TCNT2 with the maximum value to have the lowest frequency
+	;LDI R16,255
+	;STS TCNT2,R16
 
 	;enable global interrupt & timer0 and timer2 interrupt
 	LDI	R16,0x80
@@ -252,7 +252,7 @@ begin:
 	LDI R16,1
 	STS	TIMSK0,R16
 	STS TIMSK1,R16
-	STS TIMSK2,R16
+	;STS TIMSK2,R16
 
 	;Clearing the outputs
 	SBI DDRB,3			    ; Pin PB3 is an output
@@ -604,8 +604,8 @@ moveLeft:
 		RJMP notDown
 	;------------------------------------------------------
 
-Timer2OverflowInterrupt:
-RETI
+;Timer2OverflowInterrupt:
+;RETI
 
 Timer1OverflowInterrupt:
 /*
