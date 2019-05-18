@@ -9,6 +9,8 @@
 RJMP PRESSstart
 .ORG 0x0012
 RJMP Timer2OverflowInterrupt
+.ORG 0x001A
+RJMP Timer1OverflowInterrupt
 .ORG 0x0020
 RJMP Timer0OverflowInterrupt
 
@@ -202,10 +204,19 @@ RJMP rowon
 ; -------------------------------------------------------- SNAKE ------------------------------------------------------------------------
 
 begin:
-	.DEF direction = R25
-	.DEF counter   = R21
-	.DEF bytesnake = R17
-	.DEF bytefood  = R18
+	.DEF direction	= R25
+	; .DEF score		= R21
+	.DEF bytesnake	= R17
+	.DEF bytefood	= R18
+	.DEF speed		= R22
+	.DEF toggle		= R24			; Used to make the fruit darker
+	
+	.DEF score		= R1
+
+	LDI speed,0x0F
+	IN score, 0
+	LDI toggle, 1
+
 	;Set timer0 prescaler to 256
 	LDI	R16,4
 	OUT TCCR0B,R16	
@@ -214,9 +225,22 @@ begin:
 	LDI R16,7
 	STS TCCR2B,R16
 
+	LDI R16,0
+	STS PRR,R16
+
+	;Set timer1 prescaler to 1024
+	LDI	R16,3
+	STS TCCR1B,R16	
+
 	;Setting the TCNT0 value at 312Hz
 	LDI R16,56	
 	OUT TCNT0,R16
+
+	;Setting the TCNT1 value at 1Hz -> TCNT1  = 49911
+	LDI R16,0xFF	
+	LDI R19,0xFF
+	STS TCNT1H,R19
+	STS TCNT1L,R16
 
 	;Setting the TCNT0 with the maximum value to have the lowest frequency
 	LDI R16,255
@@ -227,6 +251,7 @@ begin:
 	OUT	SREG,R16
 	LDI R16,1
 	STS	TIMSK0,R16
+	STS TIMSK1,R16
 	STS TIMSK2,R16
 
 	;Clearing the outputs
@@ -406,8 +431,8 @@ food :
 	ST Y,bytefood			      	    ; Put the value pointed by Y
 
 LDI direction,6						;Initial direction (right) of the snake
-LDI R22,1						    ;Initial length of the snake.
-LDI counter,10						; R21 is used as the counter for the move interrupt
+;LDI R22,1						    ;Initial length of the snake.
+;LDI counter,10						; R21 is used as the counter for the move interrupt
 
 InitKeyboard:
     ; Configure input pin PD0 
@@ -580,14 +605,20 @@ moveLeft:
 	;------------------------------------------------------
 
 Timer2OverflowInterrupt:
+RETI
+
+Timer1OverflowInterrupt:
+/*
+This interrupt moves the spread.
+*/
 	PUSH YL
 	PUSH XL
 	PUSH R16
 	PUSH R19
-	PUSH R25
-	DEC counter							; Decrement the counter
+	;PUSH R25
+	/*DEC counter							; Decrement the counter
 	BRNE notDown						; Since the interrupt happens to often we add a counter which makes it proceed to the code every 10 times.
-	LDI counter,10
+	LDI counter,10*/
 	LDI ZH,0x01
 
 	CPI direction,6
@@ -655,7 +686,18 @@ Timer2OverflowInterrupt:
 	LD R19,Y
 	SUB R19,bytesnake
 	BRNE noOnFood
-	ST Y,R19                     
+	ST Y,R19         
+	
+	; Updating the score
+	LDI R16,1
+	ADD score,R16
+
+	; Turning up the speed
+	LDI R16,15
+	LDI R19,0xF0
+	CPSE speed,R19						; Compare, Skip if Equal -> so we reached maximum speed
+	ADD speed,R16
+	            
 	LSFR270new :
 		MOV R16, random                 ; Clone random to R16                    ex : R16 = 0b01111110
 		MOV R19, random                 ; Clone random to R19                         R17 = 0b01111110
@@ -672,16 +714,21 @@ Timer2OverflowInterrupt:
 		BRSH LSFR270new                 ; If it's equal or bigger than 70 use LSFR
 		LDI XL,0x00
 		ADD XL,random
-		LD R25,X
-		AND R25,bytesnake
-		CPI R25,0
+		LD R16,X
+		AND R16,bytesnake
+		CPI R16,0
 		BRNE LSFR270new 
 	foodnew : 
 		LDI YL,0x00                     ; Begin Y = 0x0200
 		ADD YL,random				    ; Add it the random number smaller than 70
 		ST Y,bytesnake			      	    ; Put the value pointed by Y
 	noOnFood:
-		POP R25
+		;Setting the TCNT1 
+		LDI R16,0xFF	
+		STS TCNT1H,speed
+		STS TCNT1L,R16
+
+		;POP R25
 		POP R19
 		POP R16
 		POP XL
@@ -700,6 +747,7 @@ PUSH R16
 PUSH R17						;save R17 on the stack
 PUSH R18
 PUSH R19
+PUSH R22
 PUSH R25
 PUSH ZL
 PUSH YL
@@ -734,8 +782,11 @@ Send1Row:
 		SBI PORTB,3							;carry is 1 => set PB3 high
 	NOPB3:
 		ROR R18								;Rotate R18 right througth carry
-		BRCC maze							;Branch if carry is 0
+		BRCC maze						;Branch if carry is 0
+		SUBI toggle,1
+		BRNE maze
 		SBI PORTB,3							;carry is 1 => set PB3 high
+		LDI toggle,3
 	maze:
 		ROR R25								;Rotate R18 right througth carry
 		BRCC noObstacle						;Branch if carry is 0
@@ -791,6 +842,7 @@ Send1Row:
 	POP YL
 	POP ZL
 	POP R25
+	POP R22
 	POP R19
 	POP R18
 	POP R17									;restore R17 from the stack
@@ -832,6 +884,7 @@ mazeGame :
 	ST X+,R16
 	LDI R16,8
 	ST X,R16
+	RETI
 
 startGame :
 	LDI R16,6
