@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.7  D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm Sat May 18 10:27:25 2019
+AVRASM ver. 2.2.7  D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm Sat May 18 10:52:58 2019
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m328pdef.inc'
 D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm(7): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m328pdef.inc'
@@ -1038,6 +1038,10 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
                                  ; ***** END OF FILE ******************************************************
                                  .ORG 0x0000 
 000000 c020                      RJMP PRESSstart
+                                 
+                                 ;.ORG 0x0012
+                                 ;RJMP Timer2OverflowInterrupt
+                                 
                                  .ORG 0x001A
 00001a c19e                      RJMP Timer1OverflowInterrupt
                                  .ORG 0x0020
@@ -1249,6 +1253,12 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 0000ab e004                      	LDI	R16,4
 0000ac bd05                      	OUT TCCR0B,R16	
                                  
+                                 	
+                                 	;Set timer2 with the maximum prescaler
+                                 	;LDI R16,7
+                                 	;STS TCCR2B,R16
+                                 
+                                 
 0000ad e000                      	LDI R16,0
 0000ae 9300 0064                 	STS PRR,R16
                                  	;Set timer1 prescaler to 1024
@@ -1265,12 +1275,20 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 0000b7 9330 0085                 	STS TCNT1H,R19
 0000b9 9300 0084                 	STS TCNT1L,R16
                                  
+                                 	;Setting the TCNT2 with the maximum value to have the lowest frequency
+                                 	;LDI R16,255
+                                 	;STS TCNT2,R16
+                                 
+                                 
                                  	;enable global interrupt & timer0 and timer2 interrupt
 0000bb e800                      	LDI	R16,0x80
 0000bc bf0f                      	OUT	SREG,R16
 0000bd e001                      	LDI R16,1
 0000be 9300 006e                 	STS	TIMSK0,R16
 0000c0 9300 006f                 	STS TIMSK1,R16
+                                 
+                                 	;STS TIMSK2,R16
+                                 
                                  
                                  	;Clearing the outputs
 0000c2 9a23                      	SBI DDRB,3			    ; Pin PB3 is an output
@@ -1637,6 +1655,11 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 0001b8 c02a                      		RJMP notDown
                                  	;------------------------------------------------------
                                  
+                                 
+                                 ;Timer2OverflowInterrupt:
+                                 ;RETI
+                                 
+                                 
                                  Timer1OverflowInterrupt:
                                  /*
                                  This interrupt moves the spread.
@@ -1824,7 +1847,7 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 000232 9597                      		ROR R25								;Rotate R18 right througth carry
 000233 f408                      		BRCC noObstacle						;Branch if carry is 0
 000234 9a2b                      		SBI PORTB,3							;carry is 1 => set PB3 high
-                                 		;LDI toggle,3
+                                 		
                                  	
                                  	noObstacle:
 000235 982d                      		CBI PORTB,5							;Set PB5 low
