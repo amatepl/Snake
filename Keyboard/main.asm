@@ -399,17 +399,6 @@ WriteObstacleToScreenbuffer:
 	DEC R19
 	BRNE WriteObstacleToScreenbuffer	;write 70 bytes
 ;-------------------------------------------------------------------------------------------------------
-;Send data to movebuffer------------------------------------------------------------------------------
-LDI XL,0x00						; ZL is the register R30------Z = ZL+ZH
-LDI XH,0x03						;init Z to point do address 0x0100----------ZH is the register R31
-LDI R17 ,0x00					;we will write this value to every byte of the whole screenbuffer
-
-LDI R21,70						;need to write 70 bytes to fill the whole screenbuffer
-WriteMoveToMovebuffer:
-ST X+,R17						;write value from Ra to address pointed by Z and auto-increse Z pointer
-DEC R21
-BRNE WriteMoveToMovebuffer	;write 70 bytes
-;-------------------------------------------------------------------------------------------------------
 
 ; Add the move point on the screen at a deterministic place
 LDI ZL,0					    ; Take the position of the byte
@@ -911,7 +900,6 @@ mazeGame :
 	ST X+,R16
 	LDI R16,8
 	ST X,R16
-	;RETI
 
 startGame :
 	LDI R16,6
