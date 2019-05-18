@@ -224,21 +224,13 @@ begin:
 	LDI	R16,3
 	STS TCCR1B,R16	
 
-	LDI R16,0
-	STS PRR,R16
-
-	;Set timer1 prescaler to 1024
-	LDI	R16,3
-	STS TCCR1B,R16	
-
 	;Setting the TCNT0 value at 312Hz
 	LDI R16,56	
 	OUT TCNT0,R16
 
 	;Setting the TCNT1 value at 1Hz -> TCNT1  = 49911
 	LDI R16,0xFF	
-
-	LDI R19,0xFF
+	LDI R19,0xF0
 	STS TCNT1H,R19
 	STS TCNT1L,R16
 
@@ -801,7 +793,7 @@ Send1Row:
 		ROR R25								;Rotate R18 right througth carry
 		BRCC noObstacle						;Branch if carry is 0
 		SBI PORTB,3							;carry is 1 => set PB3 high
-		LDI toggle,3
+		;LDI toggle,3
 	
 	noObstacle:
 		CBI PORTB,5							;Set PB5 low
@@ -896,7 +888,7 @@ mazeGame :
 	ST X+,R16
 	LDI R16,8
 	ST X,R16
-	RETI
+	;RETI
 
 startGame :
 	LDI R16,6
