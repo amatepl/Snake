@@ -573,7 +573,7 @@ moveRight:
 	LDI R16,65							; We've got to check if we reached the screen boundary
 
 	; Check if the sprite is on the upper right LED module. 
-	CheckWall5:							; Addresses 05,15,25,35,45,55,65 has to be checked
+	CheckWall5:							; Addresses 05,10,15,20,25,30,35,40,45,50,55,60,65 has to be checked
 		CP ZL,R16						; Compare Rd - Rr
 		BRNE notLineX5
 	ADIW Z,4							; Sprite switch to the oder side of the screen.
@@ -581,21 +581,8 @@ moveRight:
 	CLC
 	RJMP notDown
 	notLineX5:
-		SUBI R16,10
+		SUBI R16,5
 		BRGE CheckWall5
-
-	; Check if the sprite is on the down right LED module. 
-	LDI R16,60							; Addresses 0,10,20,30,40,50,60 has to be checked
-	CheckWall0:							
-		CP ZL,R16						; Compare Rd - Rr
-		BRNE notLineX0
-	ADIW Z,4							; Sprite switch to the oder side of the screen.
-	ST Z,bytesnake						; Write the sprite to the next address.
-	CLC
-	RJMP notDown
-	notLineX0:
-		SUBI R16,10
-		BRGE CheckWall0
 
 	; The sprite doesn't change the side of the seen
 	ST -Z,bytesnake						; Write the sprite to the next address. 
@@ -621,7 +608,7 @@ moveLeft:
 	ROL bytesnake						; Rotating R17 here puts back the carry into the bit sequence
 							
 	LDI R16,69							; We've got to check if we reached the screen boundary
-	CheckWall9:							; Addresses 9,19,29,39,49,59,69 has to be checked
+	CheckWall9:							; Addresses 4,9,14,19,24,29,34,39,44,49,54,59,64,69 has to be checked
 		CP ZL,R16						; Compare Rd - Rr
 		BRNE notLineX9
 	SBIW Z,4							; Sprite switch to the oder side of the screen.
@@ -629,22 +616,8 @@ moveLeft:
 	CLC
 	RJMP notDown						; Finish the move.
 	notLineX9:
-		SUBI R16,10
+		SUBI R16,5
 		BRGE CheckWall9					; Finish the move.
-
-
-	LDI R16,64							; We've got to check if we reached the screen boundary
-
-	CheckWall4:							; Addresses 4,14,24,34,44,54,64 has to be checked
-		CP ZL,R16						; Compare Rd - Rr
-		BRNE notLineX4
-	SBIW Z,4							; Sprite switch to the oder side of the screen.
-	ST Z,bytesnake						; Write the sprite to the next address.
-	CLC
-	RJMP notDown						; Finish the move.
-	notLineX4:
-		SUBI R16,10
-		BRGE CheckWall4
 
 	; The sprite doesn't change the side of the seen
 	ADIW Z,1

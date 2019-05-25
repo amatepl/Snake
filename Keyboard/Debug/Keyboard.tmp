@@ -23,8 +23,8 @@
  </OUTPUT_FILES>
  <LABELS>
   <PRESSstart><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>16</LINE></PRESSstart>
-  <Timer1OverflowInterrupt><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>659</LINE></Timer1OverflowInterrupt>
-  <Timer0OverflowInterrupt><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>799</LINE></Timer0OverflowInterrupt>
+  <Timer1OverflowInterrupt><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>646</LINE></Timer1OverflowInterrupt>
+  <Timer0OverflowInterrupt><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>786</LINE></Timer0OverflowInterrupt>
   <loop><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>35</LINE></loop>
   <init><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>50</LINE></init>
   <start><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>104</LINE></start>
@@ -39,7 +39,7 @@
   <READloop><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>154</LINE></READloop>
   <blocksloop><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>168</LINE></blocksloop>
   <begin><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>214</LINE></begin>
-  <CharTable><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>1025</LINE></CharTable>
+  <CharTable><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>1012</LINE></CharTable>
   <show><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>177</LINE></show>
   <notshow><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>173</LINE></notshow>
   <block><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>194</LINE></block>
@@ -66,50 +66,46 @@
   <upOrDown><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>512</LINE></upOrDown>
   <left><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>536</LINE></left>
   <moveRight><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>559</LINE></moveRight>
-  <isZero><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>604</LINE></isZero>
+  <isZero><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>591</LINE></isZero>
   <CheckWall5><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>576</LINE></CheckWall5>
   <notLineX5><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>583</LINE></notLineX5>
-  <notDown><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>721</LINE></notDown>
-  <CheckWall0><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>589</LINE></CheckWall0>
-  <notLineX0><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>596</LINE></notLineX0>
-  <moveLeft><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>609</LINE></moveLeft>
-  <noCarry><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>654</LINE></noCarry>
-  <CheckWall9><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>624</LINE></CheckWall9>
-  <notLineX9><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>631</LINE></notLineX9>
-  <CheckWall4><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>638</LINE></CheckWall4>
-  <notLineX4><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>645</LINE></notLineX4>
-  <notRight><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>674</LINE></notRight>
-  <notLeft><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>679</LINE></notLeft>
-  <notUp><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>701</LINE></notUp>
-  <ChangeBlockUp><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>695</LINE></ChangeBlockUp>
-  <ChangeBlock><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>716</LINE></ChangeBlock>
-  <Gameover><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>796</LINE></Gameover>
-  <noOnFood><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>780</LINE></noOnFood>
-  <speedTurn><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>748</LINE></speedTurn>
-  <LSFR270new><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>756</LINE></LSFR270new>
-  <generatenew><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>766</LINE></generatenew>
-  <foodnew><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>776</LINE></foodnew>
-  <mazeGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>920</LINE></mazeGame>
-  <Send1Row><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>831</LINE></Send1Row>
-  <COLUMNS><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>837</LINE></COLUMNS>
-  <NOPB3><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>842</LINE></NOPB3>
-  <maze><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>849</LINE></maze>
-  <noObstacle><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>855</LINE></noObstacle>
-  <CONTINUE><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>866</LINE></CONTINUE>
-  <ROWS><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>872</LINE></ROWS>
-  <NOONE><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>877</LINE></NOONE>
-  <notRow8><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>883</LINE></notRow8>
-  <time1><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>890</LINE></time1>
-  <time2><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>891</LINE></time2>
-  <startGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>955</LINE></startGame>
-  <displayGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>959</LINE></displayGame>
-  <blocksloopGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>965</LINE></blocksloopGame>
-  <ncGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>976</LINE></ncGame>
-  <blockGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>980</LINE></blockGame>
-  <turnoffGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>985</LINE></turnoffGame>
-  <rowonGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>996</LINE></rowonGame>
-  <rowoffGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>1001</LINE></rowoffGame>
-  <wait1Game><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>1011</LINE></wait1Game>
-  <wait2Game><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>1012</LINE></wait2Game>
+  <notDown><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>708</LINE></notDown>
+  <moveLeft><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>596</LINE></moveLeft>
+  <noCarry><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>641</LINE></noCarry>
+  <CheckWall9><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>611</LINE></CheckWall9>
+  <notLineX9><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>618</LINE></notLineX9>
+  <notRight><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>661</LINE></notRight>
+  <notLeft><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>666</LINE></notLeft>
+  <notUp><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>688</LINE></notUp>
+  <ChangeBlockUp><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>682</LINE></ChangeBlockUp>
+  <ChangeBlock><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>703</LINE></ChangeBlock>
+  <Gameover><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>783</LINE></Gameover>
+  <noOnFood><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>767</LINE></noOnFood>
+  <speedTurn><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>735</LINE></speedTurn>
+  <LSFR270new><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>743</LINE></LSFR270new>
+  <generatenew><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>753</LINE></generatenew>
+  <foodnew><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>763</LINE></foodnew>
+  <mazeGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>907</LINE></mazeGame>
+  <Send1Row><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>818</LINE></Send1Row>
+  <COLUMNS><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>824</LINE></COLUMNS>
+  <NOPB3><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>829</LINE></NOPB3>
+  <maze><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>836</LINE></maze>
+  <noObstacle><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>842</LINE></noObstacle>
+  <CONTINUE><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>853</LINE></CONTINUE>
+  <ROWS><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>859</LINE></ROWS>
+  <NOONE><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>864</LINE></NOONE>
+  <notRow8><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>870</LINE></notRow8>
+  <time1><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>877</LINE></time1>
+  <time2><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>878</LINE></time2>
+  <startGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>942</LINE></startGame>
+  <displayGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>946</LINE></displayGame>
+  <blocksloopGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>952</LINE></blocksloopGame>
+  <ncGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>963</LINE></ncGame>
+  <blockGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>967</LINE></blockGame>
+  <turnoffGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>972</LINE></turnoffGame>
+  <rowonGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>983</LINE></rowonGame>
+  <rowoffGame><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>988</LINE></rowoffGame>
+  <wait1Game><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>998</LINE></wait1Game>
+  <wait2Game><FILE>D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm</FILE><LINE>999</LINE></wait2Game>
  </LABELS>
 </ASSEMBLER_INFO>

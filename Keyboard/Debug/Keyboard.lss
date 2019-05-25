@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.7  D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm Sat May 25 22:36:17 2019
+AVRASM ver. 2.2.7  D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm Sun May 26 00:12:20 2019
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m328pdef.inc'
 D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard\main.asm(7): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.2.209\avrasm\inc\m328pdef.inc'
@@ -1039,9 +1039,9 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
                                  .ORG 0x0000 
 000000 c020                      RJMP PRESSstart
                                  .ORG 0x001A
-00001a c198                      RJMP Timer1OverflowInterrupt
+00001a c186                      RJMP Timer1OverflowInterrupt
                                  .ORG 0x0020
-000020 c1f3                      RJMP Timer0OverflowInterrupt
+000020 c1e1                      RJMP Timer0OverflowInterrupt
                                  
                                  ; -------------------------------------------------------- PRESS START ------------------------------------------------------------------
                                  PRESSstart :
@@ -1197,7 +1197,7 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 000088 c01b                      	RJMP begin
                                  
                                  blocksloop :
-000089 e6ec                      	LDI ZL,low(CharTable << 1)			; First element in flash memory
+000089 e4e8                      	LDI ZL,low(CharTable << 1)			; First element in flash memory
 00008a e0f5                      	LDI ZH,high(CharTable << 1)
 00008b f016                      	BRTS show							; Branch if T Flag Set.
                                  
@@ -1595,7 +1595,7 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
                                   */
                                  	
 00017c 9517                      	ROR bytesnake						; Horisontal diplacement
-00017d f4b8                      	BRCC isZero
+00017d f470                      	BRCC isZero
                                  
                                  	; The carry bit is set so we've got to change the rectangle to the one on the right 
                                  
@@ -1604,37 +1604,24 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
 000180 e401                      	LDI R16,65							; We've got to check if we reached the screen boundary
                                  
                                  	; Check if the sprite is on the upper right LED module. 
-                                 	CheckWall5:							; Addresses 05,15,25,35,45,55,65 has to be checked
+                                 	CheckWall5:							; Addresses 05,10,15,20,25,30,35,40,45,50,55,60,65 has to be checked
 000181 17e0                      		CP ZL,R16						; Compare Rd - Rr
 000182 f421                      		BRNE notLineX5
 000183 9634                      	ADIW Z,4							; Sprite switch to the oder side of the screen.
 000184 8310                      	ST Z,bytesnake						; Write the sprite to the next address.
 000185 9488                      	CLC
-000186 c056                      	RJMP notDown
+000186 c044                      	RJMP notDown
                                  	notLineX5:
-000187 500a                      		SUBI R16,10
+000187 5005                      		SUBI R16,5
 000188 f7c4                      		BRGE CheckWall5
                                  
-                                 	; Check if the sprite is on the down right LED module. 
-000189 e30c                      	LDI R16,60							; Addresses 10,20,30,40,50,60,70 has to be checked
-                                 	CheckWall0:							
-00018a 17e0                      		CP ZL,R16						; Compare Rd - Rr
-00018b f421                      		BRNE notLineX0
-00018c 9634                      	ADIW Z,4							; Sprite switch to the oder side of the screen.
-00018d 8310                      	ST Z,bytesnake						; Write the sprite to the next address.
-00018e 9488                      	CLC
-00018f c04d                      	RJMP notDown
-                                 	notLineX0:
-000190 500a                      		SUBI R16,10
-000191 f7c4                      		BRGE CheckWall0
-                                 
                                  	; The sprite doesn't change the side of the seen
-000192 9312                      	ST -Z,bytesnake						; Write the sprite to the next address. 
-000193 9488                      	CLC
-000194 c048                      	RJMP notDown						; Finish the move.
+000189 9312                      	ST -Z,bytesnake						; Write the sprite to the next address. 
+00018a 9488                      	CLC
+00018b c03f                      	RJMP notDown						; Finish the move.
                                  	isZero:
-000195 8310                      		ST Z,bytesnake					; Horisontal diplacement
-000196 c046                      		RJMP notDown					; Finish the move.
+00018c 8310                      		ST Z,bytesnake					; Horisontal diplacement
+00018d c03d                      		RJMP notDown					; Finish the move.
                                  	
                                  
                                  moveLeft:
@@ -1644,503 +1631,503 @@ D:\Polytech\2018-2019\Sensors_and_Microsystem_electronics\Labs\Keyboard\Keyboard
                                  	 * LED module according to the direction of its movement.
                                  	 */
                                  
-000197 1f11                      	ROL bytesnake						; Horisontal diplacement
-000198 f4c0                      	BRCC noCarry
+00018e 1f11                      	ROL bytesnake						; Horisontal diplacement
+00018f f478                      	BRCC noCarry
                                  
                                  	; The carry bit is set so we've got to change the rectangle to the one on the left
-000199 8310                      	ST Z,bytesnake						; Write bytesnake to the current Z
-00019a 1f11                      	ROL bytesnake						; Rotating R17 here puts back the carry into the bit sequence
+000190 8310                      	ST Z,bytesnake						; Write bytesnake to the current Z
+000191 1f11                      	ROL bytesnake						; Rotating R17 here puts back the carry into the bit sequence
                                  							
-00019b e405                      	LDI R16,69							; We've got to check if we reached the screen boundary
+000192 e405                      	LDI R16,69							; We've got to check if we reached the screen boundary
                                  	CheckWall9:							; Addresses 9,19,29,39,49,59,69 has to be checked
-00019c 17e0                      		CP ZL,R16						; Compare Rd - Rr
-00019d f421                      		BRNE notLineX9
-00019e 9734                      	SBIW Z,4							; Sprite switch to the oder side of the screen.
-00019f 8310                      	ST Z,bytesnake						; Write the sprite to the next address.
-0001a0 9488                      	CLC
-0001a1 c03b                      	RJMP notDown						; Finish the move.
+000193 17e0                      		CP ZL,R16						; Compare Rd - Rr
+000194 f421                      		BRNE notLineX9
+000195 9734                      	SBIW Z,4							; Sprite switch to the oder side of the screen.
+000196 8310                      	ST Z,bytesnake						; Write the sprite to the next address.
+000197 9488                      	CLC
+000198 c032                      	RJMP notDown						; Finish the move.
                                  	notLineX9:
-0001a2 500a                      		SUBI R16,10
-0001a3 f7c4                      		BRGE CheckWall9					; Finish the move.
+000199 5005                      		SUBI R16,5
+00019a f7c4                      		BRGE CheckWall9					; Finish the move.
                                  
                                  
-0001a4 e400                      	LDI R16,64							; We've got to check if we reached the screen boundary
+                                 /*	LDI R16,64							; We've got to check if we reached the screen boundary
                                  
                                  	CheckWall4:							; Addresses 4,14,24,34,44,54,64 has to be checked
-0001a5 17e0                      		CP ZL,R16						; Compare Rd - Rr
-0001a6 f421                      		BRNE notLineX4
-0001a7 9734                      	SBIW Z,4							; Sprite switch to the oder side of the screen.
-0001a8 8310                      	ST Z,bytesnake						; Write the sprite to the next address.
-0001a9 9488                      	CLC
-0001aa c032                      	RJMP notDown						; Finish the move.
+                                 		CP ZL,R16						; Compare Rd - Rr
+                                 		BRNE notLineX4
+                                 	SBIW Z,4							; Sprite switch to the oder side of the screen.
+                                 	ST Z,bytesnake						; Write the sprite to the next address.
+                                 	CLC
+                                 	RJMP notDown						; Finish the move.
                                  	notLineX4:
-0001ab 500a                      		SUBI R16,10
-0001ac f7c4                      		BRGE CheckWall4
-                                 
+                                 		SUBI R16,10
+                                 		BRGE CheckWall4
+                                 */
                                  	; The sprite doesn't change the side of the seen
-0001ad 9631                      	ADIW Z,1
-0001ae 8310                      	ST Z,bytesnake
-0001af 9488                      	CLC
-0001b0 c02c                      	RJMP notDown						; Finish the move.
+00019b 9631                      	ADIW Z,1
+00019c 8310                      	ST Z,bytesnake
+00019d 9488                      	CLC
+00019e c02c                      	RJMP notDown						; Finish the move.
                                  	noCarry:
-0001b1 8310                      		ST Z,bytesnake					; Horisontal diplacement
-0001b2 c02a                      		RJMP notDown
+00019f 8310                      		ST Z,bytesnake					; Horisontal diplacement
+0001a0 c02a                      		RJMP notDown
                                  
                                  
                                  Timer1OverflowInterrupt:
                                  /*
                                  This interrupt moves the spread. It takes the direction set by the player and runs the corresponding branch.
                                  */
-0001b3 93cf                      	PUSH YL
-0001b4 93af                      	PUSH XL
-0001b5 930f                      	PUSH R16
-0001b6 933f                      	PUSH R19
+0001a1 93cf                      	PUSH YL
+0001a2 93af                      	PUSH XL
+0001a3 930f                      	PUSH R16
+0001a4 933f                      	PUSH R19
                                  
-0001b7 e0f1                      	LDI ZH,0x01
+0001a5 e0f1                      	LDI ZH,0x01
                                  
-0001b8 3096                      	CPI direction,6						; Compare Register with Immediate
-0001b9 f409                      	BRNE notRight
-0001ba cfc1                      	RJMP moveRight
+0001a6 3096                      	CPI direction,6						; Compare Register with Immediate
+0001a7 f409                      	BRNE notRight
+0001a8 cfd3                      	RJMP moveRight
                                  	
                                  	notRight:
-0001bb 3094                      		CPI direction,4					; Compare Register with Immediate
-0001bc f409                      		BRNE notLeft
-0001bd cfd9                      	RJMP moveLeft
+0001a9 3094                      		CPI direction,4					; Compare Register with Immediate
+0001aa f409                      		BRNE notLeft
+0001ab cfe2                      	RJMP moveLeft
                                  
                                  	notLeft:
-0001be 3098                      		CPI direction,8					; Compare Register with Immediate
-0001bf f471                      		BRNE notUp
+0001ac 3098                      		CPI direction,8					; Compare Register with Immediate
+0001ad f471                      		BRNE notUp
                                  
                                  	;Vertical movement up-------------------------------
-0001c0 e000                      	LDI R16,0
-0001c1 8300                      	ST Z,R16							; Set Z to 0
+0001ae e000                      	LDI R16,0
+0001af 8300                      	ST Z,R16							; Set Z to 0
                                  
-0001c2 2f3e                      	MOV R19,ZL
-0001c3 33ec                      	CPI ZL,60							; Compare ZL to 60 if higher then change the rect
-0001c4 f028                      	BRLO ChangeBlockUp					; Branch if Lower
-0001c5 e401                      	LDI R16,65
-0001c6 1be0                      	SUB ZL,R16							;Subtract 65 from ZL but don't worry we add 10 at the end!
-0001c7 3431                      	CPI R19,65							;Compare the original ZL with 75 to see if we are at the top of the screen
-0001c8 f008                      	BRLO ChangeBlockUp					; Branch if Lower
-0001c9 973a                      	SBIW ZL,10
+0001b0 2f3e                      	MOV R19,ZL
+0001b1 33ec                      	CPI ZL,60							; Compare ZL to 60 if higher then change the rect
+0001b2 f028                      	BRLO ChangeBlockUp					; Branch if Lower
+0001b3 e401                      	LDI R16,65
+0001b4 1be0                      	SUB ZL,R16							;Subtract 65 from ZL but don't worry we add 10 at the end!
+0001b5 3431                      	CPI R19,65							;Compare the original ZL with 75 to see if we are at the top of the screen
+0001b6 f008                      	BRLO ChangeBlockUp					; Branch if Lower
+0001b7 973a                      	SBIW ZL,10
                                  	ChangeBlockUp:
-0001ca 963a                      		ADIW ZL,10						; Subtract 10 from Z
-0001cb e0f1                      		LDI ZH,0x01
-0001cc 8310                      		ST Z,bytesnake
-0001cd c00f                      	RJMP notDown
+0001b8 963a                      		ADIW ZL,10						; Subtract 10 from Z
+0001b9 e0f1                      		LDI ZH,0x01
+0001ba 8310                      		ST Z,bytesnake
+0001bb c00f                      	RJMP notDown
                                  	
                                  	notUp:
-0001ce 3092                      		CPI direction,2					; Compare Register with Immediate
-0001cf f469                      		BRNE notDown
+0001bc 3092                      		CPI direction,2					; Compare Register with Immediate
+0001bd f469                      		BRNE notDown
                                  	;Vertical movement down-------------------------------
-0001d0 e000                      	LDI R16,0
-0001d1 8300                      	ST Z,R16							; Set Z to 0
+0001be e000                      	LDI R16,0
+0001bf 8300                      	ST Z,R16							; Set Z to 0
                                  
-0001d2 2f3e                      	MOV R19,ZL							; Value of ZL to R19
-0001d3 30ea                      	CPI ZL,10							; Compare ZL to 10 if smaller then change the rect
-0001d4 f428                      	BRSH ChangeBlock					; Branch if Same or Higher
-0001d5 e401                      	LDI R16,65						
-0001d6 0fe0                      	ADD ZL,R16							;Adding 65 to ZL since it is lower than 20
-0001d7 3035                      	CPI R19,5							;Compare the original ZL with 5 to see if we are at the bottom of the screen
-0001d8 f408                      	BRSH ChangeBlock					; Branch if Same or Higher
-0001d9 963a                      	ADIW ZL,10							;We're at the bottom so ZL = ZL + 65 + 10
+0001c0 2f3e                      	MOV R19,ZL							; Value of ZL to R19
+0001c1 30ea                      	CPI ZL,10							; Compare ZL to 10 if smaller then change the rect
+0001c2 f428                      	BRSH ChangeBlock					; Branch if Same or Higher
+0001c3 e401                      	LDI R16,65						
+0001c4 0fe0                      	ADD ZL,R16							;Adding 65 to ZL since it is lower than 20
+0001c5 3035                      	CPI R19,5							;Compare the original ZL with 5 to see if we are at the bottom of the screen
+0001c6 f408                      	BRSH ChangeBlock					; Branch if Same or Higher
+0001c7 963a                      	ADIW ZL,10							;We're at the bottom so ZL = ZL + 65 + 10
                                  	ChangeBlock:
-0001da 973a                      		SBIW ZL,10							; Subtract 10 from Z
-0001db e0f1                      		LDI ZH,0x01
-0001dc 8310                      		ST Z,bytesnake
+0001c8 973a                      		SBIW ZL,10							; Subtract 10 from Z
+0001c9 e0f1                      		LDI ZH,0x01
+0001ca 8310                      		ST Z,bytesnake
                                  
                                  	notDown:
                                  	/*
                                  	This small section is responisible for eating an obstacle/object.
                                  	*/
-0001dd 2fae                      	MOV XL,ZL
-0001de 913c                      	LD R19,X
-0001df 2331                      	AND R19,bytesnake					; Check if the sprite is on the wall.
-0001e0 3030                      	CPI R19,0
-0001e1 f589                      	BRNE Gameover
-0001e2 2fce                      	MOV YL,ZL
-0001e3 8138                      	LD R19,Y
-0001e4 1b31                      	SUB R19,bytesnake					; Check if the sprite is on the fruit .
-0001e5 f519                      	BRNE noOnFood
+0001cb 2fae                      	MOV XL,ZL
+0001cc 913c                      	LD R19,X
+0001cd 2331                      	AND R19,bytesnake					; Check if the sprite is on the wall.
+0001ce 3030                      	CPI R19,0
+0001cf f589                      	BRNE Gameover
+0001d0 2fce                      	MOV YL,ZL
+0001d1 8138                      	LD R19,Y
+0001d2 1b31                      	SUB R19,bytesnake					; Check if the sprite is on the fruit .
+0001d3 f519                      	BRNE noOnFood
                                  
-0001e6 8338                      	ST Y,R19         
+0001d4 8338                      	ST Y,R19         
                                  
                                  	; Updating the score
-0001e7 e001                      	LDI R16,1
-0001e8 0e80                      	ADD score1,R16
-0001e9 2d08                      	MOV R16,score1
-0001ea 3009                      	CPI R16,9
-0001eb f421                      	BRNE speedTurn 
-0001ec e000                      	LDI R16,0
-0001ed 2e80                      	MOV score1,R16
-0001ee e001                      	LDI R16,1
-0001ef 0e90                      	ADD score2,R16
+0001d5 e001                      	LDI R16,1
+0001d6 0e80                      	ADD score1,R16
+0001d7 2d08                      	MOV R16,score1
+0001d8 3009                      	CPI R16,9
+0001d9 f421                      	BRNE speedTurn 
+0001da e000                      	LDI R16,0
+0001db 2e80                      	MOV score1,R16
+0001dc e001                      	LDI R16,1
+0001dd 0e90                      	ADD score2,R16
                                  
                                  speedTurn:
                                  	; Turning up the speed
-0001f0 e00f                      	LDI R16,15
-0001f1 ef30                      	LDI R19,0xF0
-0001f2 1363                      	CPSE speed,R19						; Compare, Skip if Equal -> so we reached maximum speed
-0001f3 0f60                      	ADD speed,R16
+0001de e00f                      	LDI R16,15
+0001df ef30                      	LDI R19,0xF0
+0001e0 1363                      	CPSE speed,R19						; Compare, Skip if Equal -> so we reached maximum speed
+0001e1 0f60                      	ADD speed,R16
                                  
                                  	            
                                  	LSFR270new :
-0001f4 2f07                      		MOV R16, random                 ; Clone random to R16                    ex : R16 = 0b01111110
-0001f5 2f37                      		MOV R19, random                 ; Clone random to R19                         R17 = 0b01111110
-0001f6 9576                      		LSR random                      ; Shift to the right random                   random = 0b00111111
-0001f7 fb00                      		BST R16,0					    ; Take the first bit of R16                   T = 0
-0001f8 f976                      		BLD random,6                    ; Put this at seventh place of random         random = 0b00111111
-0001f9 f936                      		BLD R19,6                       ; Same for R19                                R17 = 0b00111110
-0001fa 2730                      		EOR R19,R16                     ; R19 = R16 xor R19                           R17 = 0b01000000
-0001fb fb36                      		BST R19,6                       ; Take the seventh bit of R19                 T = 1
-0001fc f975                      		BLD random,5                    ; Put this at the sixth place of random       random = 0b00111111
+0001e2 2f07                      		MOV R16, random                 ; Clone random to R16                    ex : R16 = 0b01111110
+0001e3 2f37                      		MOV R19, random                 ; Clone random to R19                         R17 = 0b01111110
+0001e4 9576                      		LSR random                      ; Shift to the right random                   random = 0b00111111
+0001e5 fb00                      		BST R16,0					    ; Take the first bit of R16                   T = 0
+0001e6 f976                      		BLD random,6                    ; Put this at seventh place of random         random = 0b00111111
+0001e7 f936                      		BLD R19,6                       ; Same for R19                                R17 = 0b00111110
+0001e8 2730                      		EOR R19,R16                     ; R19 = R16 xor R19                           R17 = 0b01000000
+0001e9 fb36                      		BST R19,6                       ; Take the seventh bit of R19                 T = 1
+0001ea f975                      		BLD random,5                    ; Put this at the sixth place of random       random = 0b00111111
                                  	generatenew :
-0001fd 7f7f                      		ANDI random,0b011111111         ; We want a random number < 70 => we need 7 bits => random,7 = 0
-0001fe 3476                      		CPI random,70                   ; Compare random register to 70
-0001ff f7a0                      		BRSH LSFR270new                 ; If it's equal or bigger than 70 use LSFR
-000200 e0a0                      		LDI XL,0x00
-000201 0fa7                      		ADD XL,random
-000202 910c                      		LD R16,X
-000203 2301                      		AND R16,bytesnake				; Check if the fruits is generated on the sprite.
-000204 3000                      		CPI R16,0
-000205 f771                      		BRNE LSFR270new 
+0001eb 7f7f                      		ANDI random,0b011111111         ; We want a random number < 70 => we need 7 bits => random,7 = 0
+0001ec 3476                      		CPI random,70                   ; Compare random register to 70
+0001ed f7a0                      		BRSH LSFR270new                 ; If it's equal or bigger than 70 use LSFR
+0001ee e0a0                      		LDI XL,0x00
+0001ef 0fa7                      		ADD XL,random
+0001f0 910c                      		LD R16,X
+0001f1 2301                      		AND R16,bytesnake				; Check if the fruits is generated on the sprite.
+0001f2 3000                      		CPI R16,0
+0001f3 f771                      		BRNE LSFR270new 
                                  	foodnew : 
-000206 e0c0                      		LDI YL,0x00                     ; Begin Y = 0x0200
-000207 0fc7                      		ADD YL,random				    ; Add it the random number smaller than 70
-000208 8318                      		ST Y,bytesnake			      	    ; Put the value pointed by Y
+0001f4 e0c0                      		LDI YL,0x00                     ; Begin Y = 0x0200
+0001f5 0fc7                      		ADD YL,random				    ; Add it the random number smaller than 70
+0001f6 8318                      		ST Y,bytesnake			      	    ; Put the value pointed by Y
                                  	noOnFood:
                                  
                                  		;Setting the TCNT1 
                                  
-000209 ef0f                      		LDI R16,0xFF	
-00020a 9360 0085                 		STS TCNT1H,speed
-00020c 9300 0084                 		STS TCNT1L,R16
+0001f7 ef0f                      		LDI R16,0xFF	
+0001f8 9360 0085                 		STS TCNT1H,speed
+0001fa 9300 0084                 		STS TCNT1L,R16
                                  
                                  
                                  
-00020e 913f                      		POP R19
-00020f 910f                      		POP R16
-000210 91af                      		POP XL
-000211 91cf                      		POP YL
-000212 9518                      		RETI
+0001fc 913f                      		POP R19
+0001fd 910f                      		POP R16
+0001fe 91af                      		POP XL
+0001ff 91cf                      		POP YL
+000200 9518                      		RETI
                                  
                                  Gameover :
-000213 c04f                      	RJMP mazeGame
+000201 c04f                      	RJMP mazeGame
                                  
                                  Timer0OverflowInterrupt:
                                  /*
                                  The goal of the interrupt is to refresh the screen,
                                  */
                                  ;Initialising Z
-000214 930f                      PUSH R16
-000215 931f                      PUSH R17						;save R17 on the stack
-000216 932f                      PUSH R18
-000217 933f                      PUSH R19
-000218 936f                      PUSH R22
-000219 939f                      PUSH R25
+000202 930f                      PUSH R16
+000203 931f                      PUSH R17						;save R17 on the stack
+000204 932f                      PUSH R18
+000205 933f                      PUSH R19
+000206 936f                      PUSH R22
+000207 939f                      PUSH R25
                                  
-00021a 93ef                      PUSH ZL
-00021b 93cf                      PUSH YL
+000208 93ef                      PUSH ZL
+000209 93cf                      PUSH YL
                                  /* 
                                  We use 2 poiners registers for the screen Z contains the snake while Y the object the snake can eat.
                                  */
-00021c e0e0                      LDI ZL,0x00
-00021d e0f1                      LDI ZH,0x01						;init Z to point do address 0x0100
-00021e 9111                      LD R17,Z+						;write value from address pointed by Z to Ra and auto-increse Z pointer
+00020a e0e0                      LDI ZL,0x00
+00020b e0f1                      LDI ZH,0x01						;init Z to point do address 0x0100
+00020c 9111                      LD R17,Z+						;write value from address pointed by Z to Ra and auto-increse Z pointer
                                  
-00021f e0c0                      LDI YL,0x00
-000220 e0d2                      LDI YH,0x02						;init Z to point do address 0x0100
-000221 9129                      LD R18,Y+						;write value from address pointed by Z to Ra and auto-increse Z pointer
+00020d e0c0                      LDI YL,0x00
+00020e e0d2                      LDI YH,0x02						;init Z to point do address 0x0100
+00020f 9129                      LD R18,Y+						;write value from address pointed by Z to Ra and auto-increse Z pointer
                                  
-000222 e0a0                      LDI XL,0x00
-000223 e0b3                      LDI XH,0x03						
-000224 919d                      LD R25,X+						
+000210 e0a0                      LDI XL,0x00
+000211 e0b3                      LDI XH,0x03						
+000212 919d                      LD R25,X+						
                                  
                                  ;Rows counter
-000225 e062                      LDI R22,0x02
+000213 e062                      LDI R22,0x02
                                  
                                  Send1Row:
                                  	;Byte counter
-000226 e048                      	LDI R20,8
+000214 e048                      	LDI R20,8
                                  	;Columns counter
-000227 e500                      	LDI R16,80	
-000228 9488                      	CLC
+000215 e500                      	LDI R16,80	
+000216 9488                      	CLC
                                  	COLUMNS:
-000229 982b                      		CBI PORTB,3							;Set PB3 low
-00022a 9517                      		ROR R17								;Rotate R17 right througth carry
-00022b f408                      		BRCC NOPB3							;Branch if carry is 0
-00022c 9a2b                      		SBI PORTB,3							;carry is 1 => set PB3 high
+000217 982b                      		CBI PORTB,3							;Set PB3 low
+000218 9517                      		ROR R17								;Rotate R17 right througth carry
+000219 f408                      		BRCC NOPB3							;Branch if carry is 0
+00021a 9a2b                      		SBI PORTB,3							;carry is 1 => set PB3 high
                                  	NOPB3:
-00022d 9527                      		ROR R18								;Rotate R18 right througth carry
-00022e f420                      		BRCC maze						;Branch if carry is 0
-00022f 5081                      		SUBI toggle,1
-000230 f411                      		BRNE maze
-000231 9a2b                      		SBI PORTB,3							;carry is 1 => set PB3 high
-000232 e083                      		LDI toggle,3
+00021b 9527                      		ROR R18								;Rotate R18 right througth carry
+00021c f420                      		BRCC maze						;Branch if carry is 0
+00021d 5081                      		SUBI toggle,1
+00021e f411                      		BRNE maze
+00021f 9a2b                      		SBI PORTB,3							;carry is 1 => set PB3 high
+000220 e083                      		LDI toggle,3
                                  	maze:
-000233 9597                      		ROR R25								;Rotate R18 right througth carry
-000234 f408                      		BRCC noObstacle						;Branch if carry is 0
-000235 9a2b                      		SBI PORTB,3							;carry is 1 => set PB3 high
+000221 9597                      		ROR R25								;Rotate R18 right througth carry
+000222 f408                      		BRCC noObstacle						;Branch if carry is 0
+000223 9a2b                      		SBI PORTB,3							;carry is 1 => set PB3 high
                                  		
                                  	
                                  	noObstacle:
-000236 982d                      		CBI PORTB,5							;Set PB5 low
-000237 9a2d                      		SBI PORTB,5							;Set PB5 high
-000238 954a                      		DEC R20
-000239 f421                      		BRNE CONTINUE						;Branch if not all the bits have been analysed
+000224 982d                      		CBI PORTB,5							;Set PB5 low
+000225 9a2d                      		SBI PORTB,5							;Set PB5 high
+000226 954a                      		DEC R20
+000227 f421                      		BRNE CONTINUE						;Branch if not all the bits have been analysed
                                  								
-00023a e048                      	LDI R20,8
-00023b 9111                      	LD R17,Z+							;write value from address pointed by Z to Ra and auto-increse Z pointer
-00023c 9129                      	LD R18,Y+
-00023d 919d                      	LD R25,X+
+000228 e048                      	LDI R20,8
+000229 9111                      	LD R17,Z+							;write value from address pointed by Z to Ra and auto-increse Z pointer
+00022a 9129                      	LD R18,Y+
+00022b 919d                      	LD R25,X+
                                  
                                  	CONTINUE:
-00023e 950a                      		DEC R16
-00023f f749                      		BRNE COLUMNS
+00022c 950a                      		DEC R16
+00022d f749                      		BRNE COLUMNS
                                  
-000240 e008                      	LDI R16,8	;Rows counter
-000241 9488                      	CLC
+00022e e008                      	LDI R16,8	;Rows counter
+00022f 9488                      	CLC
                                  	ROWS:
-000242 982b                      		CBI PORTB,3							;Set PB3 low
-000243 9567                      		ROR R22								;Rotate R22 right througth carry
-000244 f408                      		BRCC NOONE							;Branch if carry is 0
-000245 9a2b                      		SBI PORTB,3							;carry is 1 => set PB3 high
+000230 982b                      		CBI PORTB,3							;Set PB3 low
+000231 9567                      		ROR R22								;Rotate R22 right througth carry
+000232 f408                      		BRCC NOONE							;Branch if carry is 0
+000233 9a2b                      		SBI PORTB,3							;carry is 1 => set PB3 high
                                  	NOONE:
-000246 982d                      		CBI PORTB,5							;Set PB5 low
-000247 9a2d                      		SBI PORTB,5							;Set PB5 high
-000248 950a                      		DEC R16
-000249 f7c1                      		BRNE ROWS
+000234 982d                      		CBI PORTB,5							;Set PB5 low
+000235 9a2d                      		SBI PORTB,5							;Set PB5 high
+000236 950a                      		DEC R16
+000237 f7c1                      		BRNE ROWS
                                  	
                                  	notRow8:
-00024a 982c                      		CBI PORTB,4								;Set PB4 low
-00024b 9a2c                      		SBI PORTB,4								;Set PB4 high
+000238 982c                      		CBI PORTB,4								;Set PB4 low
+000239 9a2c                      		SBI PORTB,4								;Set PB4 high
                                  
                                  	;PB4 delay parameters
-00024c e009                      	LDI R16,9								;Setting up the delay between SBI PB4 and CBI PB4
-00024d ef4f                      	LDI R20,255
+00023a e009                      	LDI R16,9								;Setting up the delay between SBI PB4 and CBI PB4
+00023b ef4f                      	LDI R20,255
                                  	time1:
                                  		time2:
-00024e 950a                      			DEC R16
-00024f f7f1                      			BRNE time2
-000250 e009                      			LDI R16,9
-000251 954a                      		DEC R20
-000252 f7d9                      	BRNE time1
-000253 ef4f                      	LDI R20,255
-000254 982c                      	CBI PORTB,4								;Set PB4 low
+00023c 950a                      			DEC R16
+00023d f7f1                      			BRNE time2
+00023e e009                      			LDI R16,9
+00023f 954a                      		DEC R20
+000240 f7d9                      	BRNE time1
+000241 ef4f                      	LDI R20,255
+000242 982c                      	CBI PORTB,4								;Set PB4 low
                                  
-000255 2366                      	TST R22									;Check if R22 = 0x00
-000256 f679                      	BRNE Send1Row							;If R22 != 0x00 plot next row if not, stop the time interrupt
+000243 2366                      	TST R22									;Check if R22 = 0x00
+000244 f679                      	BRNE Send1Row							;If R22 != 0x00 plot next row if not, stop the time interrupt
                                  	
                                  	;Setting the TCNT0 value at 312Hz
-000257 e308                      	LDI R16,56	
-000258 bd06                      	OUT TCNT0,R16
+000245 e308                      	LDI R16,56	
+000246 bd06                      	OUT TCNT0,R16
                                  
-000259 91cf                      	POP YL
-00025a 91ef                      	POP ZL
+000247 91cf                      	POP YL
+000248 91ef                      	POP ZL
                                  
-00025b 919f                      	POP R25
-00025c 916f                      	POP R22
-00025d 913f                      	POP R19
-00025e 912f                      	POP R18
-00025f 911f                      	POP R17									;restore R17 from the stack
-000260 910f                      	POP R16
-000261 9488                      	CLC
-000262 9518                      	RETI
+000249 919f                      	POP R25
+00024a 916f                      	POP R22
+00024b 913f                      	POP R19
+00024c 912f                      	POP R18
+00024d 911f                      	POP R17									;restore R17 from the stack
+00024e 910f                      	POP R16
+00024f 9488                      	CLC
+000250 9518                      	RETI
                                  
                                  // ---------------------- Game over --------------------------------------------
                                  mazeGame :
-000263 e0a0                      	LDI XL,0x00
-000264 e0b1                      	LDI XH,0x01
-000265 e00d                      	LDI R16,13								;G
-000266 930d                      	ST X+,R16
-000267 e00b                      	LDI R16,11								;A
-000268 930d                      	ST X+,R16
-000269 e00e                      	LDI R16,14								;M
-00026a 930d                      	ST X+,R16
-00026b e00c                      	LDI R16,12								;E
-00026c 930d                      	ST X+,R16
-00026d e00a                      	LDI R16,10								;space
-00026e 930d                      	ST X+,R16
+000251 e0a0                      	LDI XL,0x00
+000252 e0b1                      	LDI XH,0x01
+000253 e00d                      	LDI R16,13								;G
+000254 930d                      	ST X+,R16
+000255 e00b                      	LDI R16,11								;A
+000256 930d                      	ST X+,R16
+000257 e00e                      	LDI R16,14								;M
+000258 930d                      	ST X+,R16
+000259 e00c                      	LDI R16,12								;E
+00025a 930d                      	ST X+,R16
+00025b e00a                      	LDI R16,10								;space
+00025c 930d                      	ST X+,R16
+00025d 930d                      	ST X+,R16
+00025e 2d09                      	MOV R16,score2
+00025f 930d                      	ST X+,R16
+000260 2d08                      	MOV R16,score1
+000261 930d                      	ST X+,R16
+000262 e00f                      	LDI R16,15								;O
+000263 930d                      	ST X+,R16
+000264 e104                      	LDI R16,20								;V
+000265 930d                      	ST X+,R16
+000266 e00c                      	LDI R16,12								;E
+000267 930d                      	ST X+,R16
+000268 e101                      	LDI R16,17								;R
+000269 930d                      	ST X+,R16
+00026a e00a                      	LDI R16,10								;space
+00026b 930d                      	ST X+,R16
+00026c e100                      	LDI R16,16								;P
+00026d 930d                      	ST X+,R16
+00026e e103                      	LDI R16,19								;T
 00026f 930d                      	ST X+,R16
-000270 2d09                      	MOV R16,score2
-000271 930d                      	ST X+,R16
-000272 2d08                      	MOV R16,score1
-000273 930d                      	ST X+,R16
-000274 e00f                      	LDI R16,15								;O
-000275 930d                      	ST X+,R16
-000276 e104                      	LDI R16,20								;V
-000277 930d                      	ST X+,R16
-000278 e00c                      	LDI R16,12								;E
-000279 930d                      	ST X+,R16
-00027a e101                      	LDI R16,17								;R
-00027b 930d                      	ST X+,R16
-00027c e00a                      	LDI R16,10								;space
-00027d 930d                      	ST X+,R16
-00027e e100                      	LDI R16,16								;P
-00027f 930d                      	ST X+,R16
-000280 e103                      	LDI R16,19								;T
-000281 930d                      	ST X+,R16
-000282 e102                      	LDI R16,18								;S
-000283 930c                      	ST X,R16
+000270 e102                      	LDI R16,18								;S
+000271 930c                      	ST X,R16
                                  
                                  startGame :
-000284 e006                      	LDI R16,6								; Count from 6 to 0 to have all the flash line
-000285 e420                      	LDI R18,0b01000000						; Send the row
+000272 e006                      	LDI R16,6								; Count from 6 to 0 to have all the flash line
+000273 e420                      	LDI R18,0b01000000						; Send the row
                                  
                                  displayGame :
-000286 e1a0                      	LDI XL,0x10
-000287 e0b1                      	LDI XH,0x01
-000288 e018                      	LDI R17,8
-000289 e130                      	LDI R19,16
+000274 e1a0                      	LDI XL,0x10
+000275 e0b1                      	LDI XH,0x01
+000276 e018                      	LDI R17,8
+000277 e130                      	LDI R19,16
                                  	 
                                  blocksloopGame :
-00028a e6ec                      	LDI ZL,low(CharTable << 1)
-00028b e0f5                      	LDI ZH,high(CharTable << 1)
-00028c 915e                      	LD R21,-X
-00028d 9f51                      	MUL R21,R17
-00028e 2d50                      	MOV R21,R0
-00028f 0f50                      	ADD R21,R16
-000290 1fe5                      	ADC ZL,R21								; Add with Carry two Registers
-000291 f410                      	BRCC ncGame								; Branch if carry cleared
-000292 e051                      	LDI R21,1
-000293 0ff5                      	ADD ZH,R21
+000278 e4e8                      	LDI ZL,low(CharTable << 1)
+000279 e0f5                      	LDI ZH,high(CharTable << 1)
+00027a 915e                      	LD R21,-X
+00027b 9f51                      	MUL R21,R17								; multiply by eight to have the first element of the line R1:R0 <- Rd x Rr
+00027c 2d50                      	MOV R21,R0								; Move Between Registers Rd <- Rr
+00027d 0f50                      	ADD R21,R16								; Add row to have the byte of the line
+00027e 1fe5                      	ADC ZL,R21								; Add with Carry two Registers
+00027f f410                      	BRCC ncGame								; Branch if carry cleared
+000280 e051                      	LDI R21,1
+000281 0ff5                      	ADD ZH,R21
                                  	ncGame :
-000294 9154                      		LPM R21,Z
-000295 e045                      		LDI R20,5							; The diplayed symbol is 5 bits large.
+000282 9154                      		LPM R21,Z							; Load the byte at the position stored in Z in R21
+000283 e045                      		LDI R20,5							; The diplayed symbol is 5 bits large.
                                  
                                  blockGame :
-000296 9557                      	ROR R21
-000297 f408                      	BRCC turnoffGame
-000298 9a2b                      	SBI PORTB,3
+000284 9557                      	ROR R21									; shift to the right R21 
+000285 f408                      	BRCC turnoffGame
+000286 9a2b                      	SBI PORTB,3								; If it's a one turn on the LED
                                  
                                  turnoffGame :
-000299 9a2d                      	SBI PORTB,5
-00029a 982d                      	CBI PORTB,5
-00029b 982b                      	CBI PORTB,3
-00029c 954a                      	DEC R20
-00029d f7c1                      	BRNE blockGame
+000287 9a2d                      	SBI PORTB,5
+000288 982d                      	CBI PORTB,5
+000289 982b                      	CBI PORTB,3
+00028a 954a                      	DEC R20
+00028b f7c1                      	BRNE blockGame
                                  
-00029e 953a                      DEC R19
-00029f f751                      BRNE blocksloopGame
-0002a0 2f52                      MOV R21,R18
+00028c 953a                      DEC R19
+00028d f751                      BRNE blocksloopGame
+00028e 2f52                      MOV R21,R18
                                  
                                  rowonGame :
-0002a1 1f55                      	ROL R21
-0002a2 f408                      	BRCC rowoffGame
-0002a3 9a2b                      	SBI PORTB,3
+00028f 1f55                      	ROL R21
+000290 f408                      	BRCC rowoffGame
+000291 9a2b                      	SBI PORTB,3
                                  
                                  rowoffGame :
-0002a4 9a2d                      	SBI PORTB,5
-0002a5 982d                      	CBI PORTB,5
-0002a6 982b                      	CBI PORTB,3
-0002a7 951a                      	DEC R17
-0002a8 f7c1                      	BRNE rowonGame
+000292 9a2d                      	SBI PORTB,5
+000293 982d                      	CBI PORTB,5
+000294 982b                      	CBI PORTB,3
+000295 951a                      	DEC R17									; Decrement the rows
+000296 f7c1                      	BRNE rowonGame
                                  
-0002a9 9a2c                      SBI PORTB,4
-0002aa ef3f                      LDI R19,255
-0002ab e049                      LDI R20,9
+000297 9a2c                      SBI PORTB,4
+000298 ef3f                      LDI R19,255
+000299 e049                      LDI R20,9
                                  wait1Game:
                                  	wait2Game:
-0002ac 954a                      		DEC R20
-0002ad f7f1                      		BRNE wait2Game
-0002ae e049                      	LDI R20,9
-0002af 953a                      	DEC R19
-0002b0 f7d9                      	BRNE wait1Game
-0002b1 982c                      CBI PORTB,4
+00029a 954a                      		DEC R20
+00029b f7f1                      		BRNE wait2Game
+00029c e049                      	LDI R20,9
+00029d 953a                      	DEC R19
+00029e f7d9                      	BRNE wait1Game
+00029f 982c                      CBI PORTB,4
                                  
-0002b2 950a                      DEC R16
-0002b3 9526                      LSR R18										; Logical Shift Right
-0002b4 f279                      BREQ startGame
-0002b5 cfd0                      RJMP displayGame
+0002a0 950a                      DEC R16
+0002a1 9526                      LSR R18										; Logical Shift Right
+0002a2 f279                      BREQ startGame
+0002a3 cfd0                      RJMP displayGame
                                  
                                  CharTable:
                                  /*
                                   *Every character in the flash memory by using the .db directive.
                                   */
-0002b6 111f
-0002b7 1111
-0002b8 1111
-0002b9 001f                      .db 0b00011111,0b00010001,0b00010001,0b00010001,0b00010001,0b00010001,0b00011111,0b00000000 ; 0
-0002ba 0c04
-0002bb 0414
-0002bc 0404
-0002bd 001f                      .db 0b00000100,0b00001100,0b00010100,0b00000100,0b00000100,0b00000100,0b00011111,0b00000000 ; 1
-0002be 111f
-0002bf 0201
-0002c0 0804
-0002c1 001f                      .db 0b00011111,0b00010001,0b00000001,0b00000010,0b00000100,0b00001000,0b00011111,0b00000000 ; 2
-0002c2 011f
-0002c3 1f01
-0002c4 0101
-0002c5 001f                      .db 0b00011111,0b00000001,0b00000001,0b00011111,0b00000001,0b00000001,0b00011111,0b00000000 ; 3
+0002a4 111f
+0002a5 1111
+0002a6 1111
+0002a7 001f                      .db 0b00011111,0b00010001,0b00010001,0b00010001,0b00010001,0b00010001,0b00011111,0b00000000 ; 0
+0002a8 0c04
+0002a9 0414
+0002aa 0404
+0002ab 001f                      .db 0b00000100,0b00001100,0b00010100,0b00000100,0b00000100,0b00000100,0b00011111,0b00000000 ; 1
+0002ac 111f
+0002ad 0201
+0002ae 0804
+0002af 001f                      .db 0b00011111,0b00010001,0b00000001,0b00000010,0b00000100,0b00001000,0b00011111,0b00000000 ; 2
+0002b0 011f
+0002b1 1f01
+0002b2 0101
+0002b3 001f                      .db 0b00011111,0b00000001,0b00000001,0b00011111,0b00000001,0b00000001,0b00011111,0b00000000 ; 3
+0002b4 1111
+0002b5 1f11
+0002b6 0101
+0002b7 0001                      .db 0b00010001,0b00010001,0b00010001,0b00011111,0b00000001,0b00000001,0b00000001,0b00000000 ; 4
+0002b8 101f
+0002b9 1f10
+0002ba 0101
+0002bb 001f                      .db 0b00011111,0b00010000,0b00010000,0b00011111,0b00000001,0b00000001,0b00011111,0b00000000 ; 5
+0002bc 101f
+0002bd 1f10
+0002be 1111
+0002bf 001f                      .db 0b00011111,0b00010000,0b00010000,0b00011111,0b00010001,0b00010001,0b00011111,0b00000000 ; 6
+0002c0 111f
+0002c1 0201
+0002c2 0804
+0002c3 0010                      .db 0b00011111,0b00010001,0b00000001,0b00000010,0b00000100,0b00001000,0b00010000,0b00000000 ; 7 
+0002c4 111f
+0002c5 1f11
 0002c6 1111
-0002c7 1f11
-0002c8 0101
-0002c9 0001                      .db 0b00010001,0b00010001,0b00010001,0b00011111,0b00000001,0b00000001,0b00000001,0b00000000 ; 4
-0002ca 101f
-0002cb 1f10
-0002cc 0101
-0002cd 001f                      .db 0b00011111,0b00010000,0b00010000,0b00011111,0b00000001,0b00000001,0b00011111,0b00000000 ; 5
-0002ce 101f
-0002cf 1f10
-0002d0 1111
-0002d1 001f                      .db 0b00011111,0b00010000,0b00010000,0b00011111,0b00010001,0b00010001,0b00011111,0b00000000 ; 6
+0002c7 001f                      .db 0b00011111,0b00010001,0b00010001,0b00011111,0b00010001,0b00010001,0b00011111,0b00000000 ; 8
+0002c8 111f
+0002c9 1f11
+0002ca 0101
+0002cb 001f                      .db 0b00011111,0b00010001,0b00010001,0b00011111,0b00000001,0b00000001,0b00011111,0b00000000 ; 9
+0002cc 0000
+0002cd 0000
+0002ce 0000
+0002cf 0000                      .db 0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000 ; nothing 10
+0002d0 0a04
+0002d1 1111
 0002d2 111f
-0002d3 0201
-0002d4 0804
-0002d5 0010                      .db 0b00011111,0b00010001,0b00000001,0b00000010,0b00000100,0b00001000,0b00010000,0b00000000 ; 7 
-0002d6 111f
-0002d7 1f11
-0002d8 1111
-0002d9 001f                      .db 0b00011111,0b00010001,0b00010001,0b00011111,0b00010001,0b00010001,0b00011111,0b00000000 ; 8
-0002da 111f
-0002db 1f11
-0002dc 0101
-0002dd 001f                      .db 0b00011111,0b00010001,0b00010001,0b00011111,0b00000001,0b00000001,0b00011111,0b00000000 ; 9
-0002de 0000
-0002df 0000
-0002e0 0000
-0002e1 0000                      .db 0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000,0b00000000 ; nothing 10
-0002e2 0a04
-0002e3 1111
+0002d3 0011                      .db 0b00000100,0b00001010,0b00010001,0b00010001,0b00011111,0b00010001,0b00010001,0b00000000 ;A => 11
+0002d4 101f
+0002d5 1f10
+0002d6 1010
+0002d7 001f                      .db 0b00011111,0b00010000,0b00010000,0b00011111,0b00010000,0b00010000,0b00011111,0b00000000 ;E => 12
+0002d8 101f
+0002d9 1710
+0002da 1111
+0002db 001f                      .db 0b00011111,0b00010000,0b00010000,0b00010111,0b00010001,0b00010001,0b00011111,0b00000000 ;G => 13
+0002dc 1b11
+0002dd 1115
+0002de 1111
+0002df 0011                      .db 0b00010001,0b00011011,0b00010101,0b00010001,0b00010001,0b00010001,0b00010001,0b00000000 ;M => 14
+0002e0 111f
+0002e1 1111
+0002e2 1111
+0002e3 001f                      .db 0b00011111,0b00010001,0b00010001,0b00010001,0b00010001,0b00010001,0b00011111,0b00000000 ;O => 15
 0002e4 111f
-0002e5 0011                      .db 0b00000100,0b00001010,0b00010001,0b00010001,0b00011111,0b00010001,0b00010001,0b00000000 ;A => 11
-0002e6 101f
-0002e7 1f10
-0002e8 1010
-0002e9 001f                      .db 0b00011111,0b00010000,0b00010000,0b00011111,0b00010000,0b00010000,0b00011111,0b00000000 ;E => 12
-0002ea 101f
-0002eb 1710
-0002ec 1111
-0002ed 001f                      .db 0b00011111,0b00010000,0b00010000,0b00010111,0b00010001,0b00010001,0b00011111,0b00000000 ;G => 13
-0002ee 1b11
-0002ef 1115
-0002f0 1111
-0002f1 0011                      .db 0b00010001,0b00011011,0b00010101,0b00010001,0b00010001,0b00010001,0b00010001,0b00000000 ;M => 14
-0002f2 111f
-0002f3 1111
+0002e5 1f11
+0002e6 1010
+0002e7 0010                      .db 0b00011111,0b00010001,0b00010001,0b00011111,0b00010000,0b00010000,0b00010000,0b00000000 ;P => 16
+0002e8 111f
+0002e9 1f11
+0002ea 1214
+0002eb 0011                      .db 0b00011111,0b00010001,0b00010001,0b00011111,0b00010100,0b00010010,0b00010001,0b00000000 ;R => 17
+0002ec 101f
+0002ed 1f10
+0002ee 0101
+0002ef 001f                      .db 0b00011111,0b00010000,0b00010000,0b00011111,0b00000001,0b00000001,0b00011111,0b00000000 ;S => 18
+0002f0 041f
+0002f1 0404
+0002f2 0404
+0002f3 0004                      .db 0b00011111,0b00000100,0b00000100,0b00000100,0b00000100,0b00000100,0b00000100,0b00000000 ;T => 19
 0002f4 1111
-0002f5 001f                      .db 0b00011111,0b00010001,0b00010001,0b00010001,0b00010001,0b00010001,0b00011111,0b00000000 ;O => 15
-0002f6 111f
-0002f7 1f11
-0002f8 1010
-0002f9 0010                      .db 0b00011111,0b00010001,0b00010001,0b00011111,0b00010000,0b00010000,0b00010000,0b00000000 ;P => 16
-0002fa 111f
-0002fb 1f11
-0002fc 1214
-0002fd 0011                      .db 0b00011111,0b00010001,0b00010001,0b00011111,0b00010100,0b00010010,0b00010001,0b00000000 ;R => 17
-0002fe 101f
-0002ff 1f10
-000300 0101
-000301 001f                      .db 0b00011111,0b00010000,0b00010000,0b00011111,0b00000001,0b00000001,0b00011111,0b00000000 ;S => 18
-000302 041f
-000303 0404
-000304 0404
-000305 0004                      .db 0b00011111,0b00000100,0b00000100,0b00000100,0b00000100,0b00000100,0b00000100,0b00000000 ;T => 19
-000306 1111
-000307 1111
-000308 0a11
-000309 0004                      .db 0b00010001,0b00010001,0b00010001,0b00010001,0b00010001,0b00001010,0b00000100,0b00000000 ;V => 20
+0002f5 1111
+0002f6 0a11
+0002f7 0004                      .db 0b00010001,0b00010001,0b00010001,0b00010001,0b00010001,0b00001010,0b00000100,0b00000000 ;V => 20
                                  
 
 
@@ -2159,39 +2146,39 @@ counted separately from r26..r31 here.
 .dseg memory usage only counts static data declared with .byte
 
 "ATmega328P" register use summary:
-x  :  44 y  :  19 z  :  25 r0 :   2 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
+x  :  44 y  :  19 z  :  21 r0 :   2 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   5 r9 :   3 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16: 217 r17:  35 r18:  14 r19:  56 r20:  16 
+r13:   0 r14:   0 r15:   0 r16: 211 r17:  33 r18:  14 r19:  56 r20:  16 
 r21:  44 r22:  14 r23:  22 r24:   3 r25:  17 r26:  11 r27:   4 r28:  13 
-r29:   4 r30:  25 r31:   9 
+r29:   4 r30:  23 r31:   9 
 Registers used: 22 out of 35 (62.9%)
 
 "ATmega328P" instruction use summary:
-.lds  :   0 .sts  :   0 adc   :   2 add   :  12 adiw  :   5 and   :   3 
+.lds  :   0 .sts  :   0 adc   :   2 add   :  12 adiw  :   4 and   :   3 
 andi  :   2 asr   :   0 bclr  :   0 bld   :   6 brbc  :   0 brbs  :   0 
-brcc  :  12 brcs  :   0 break :   0 breq  :   3 brge  :   4 brhc  :   0 
+brcc  :  12 brcs  :   0 break :   0 breq  :   3 brge  :   2 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   2 brlt  :   0 brmi  :   0 
-brne  :  43 brpl  :   0 brsh  :   4 brtc  :   0 brts  :   2 brvc  :   0 
+brne  :  41 brpl  :   0 brsh  :   4 brtc  :   0 brts  :   2 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   4 call  :   0 cbi   :  22 cbr   :   0 
-clc   :   9 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
-clt   :   1 clv   :   0 clz   :   0 com   :   0 cp    :   4 cpc   :   0 
+clc   :   7 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
+clt   :   1 clv   :   0 clz   :   0 com   :   0 cp    :   2 cpc   :   0 
 cpi   :  15 cpse  :   1 dec   :  31 eor   :   2 fmul  :   0 fmuls :   0 
 fmulsu:   0 icall :   0 ijmp  :   0 in    :   0 inc   :   0 jmp   :   0 
-ld    :  12 ldd   :   0 ldi   : 183 lds   :   0 lpm   :   4 lsl   :   0 
+ld    :  12 ldd   :   0 ldi   : 181 lds   :   0 lpm   :   4 lsl   :   0 
 lsr   :   4 mov   :  19 movw  :   0 mul   :   2 muls  :   0 mulsu :   0 
 neg   :   0 nop   :   5 or    :   0 ori   :   0 out   :  36 pop   :  12 
-push  :  12 rcall :   0 ret   :   0 reti  :   2 rjmp  :  36 rol   :   4 
+push  :  12 rcall :   0 ret   :   0 reti  :   2 rjmp  :  34 rol   :   4 
 ror   :   8 sbc   :   0 sbci  :   0 sbi   :  23 sbic  :   0 sbis  :  12 
-sbiw  :   4 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
+sbiw  :   3 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   2 sev   :   0 
-sez   :   0 sleep :   0 spm   :   0 st    :  69 std   :   0 sts   :  10 
-sub   :   2 subi  :   5 swap  :   0 tst   :   1 wdr   :   0 
+sez   :   0 sleep :   0 spm   :   0 st    :  67 std   :   0 sts   :  10 
+sub   :   2 subi  :   3 swap  :   0 tst   :   1 wdr   :   0 
 Instructions used: 45 out of 113 (39.8%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000614   1328    168   1496   32768   4.6%
+[.cseg] 0x000000 0x0005f0   1292    168   1460   32768   4.5%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 
