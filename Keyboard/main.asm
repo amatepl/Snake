@@ -7,10 +7,6 @@
 .INCLUDE "m328pdef.inc"
 .ORG 0x0000 
 RJMP PRESSstart
-
-;.ORG 0x0012
-;RJMP Timer2OverflowInterrupt
-
 .ORG 0x001A
 RJMP Timer1OverflowInterrupt
 .ORG 0x0020
@@ -18,6 +14,10 @@ RJMP Timer0OverflowInterrupt
 
 ; -------------------------------------------------------- PRESS START ------------------------------------------------------------------
 PRESSstart :
+/*
+ * Y pointer register is used to write 'PRESS START' on the screen. 
+ * The characters are defined in the flash meory in the CharTable at the botton of the code.
+ */
 	LDI YL,0x00
 	LDI YH,0x01
 	LDI R16,0b00
@@ -48,30 +48,33 @@ PRESSstart :
 	ST Y,R16
 
 init :
+/*
+ * Initializing the screen outputs (shift registers) and setting up the counter for the random number. 
+ */
+
 	.DEF random = R23
-	LDI R22,200
+	LDI R22,200				; Counter for the flashing PRESS START
 	LDI random,255
-	SET
-
-	CBI DDRB,0			    ; Pin PB0 is an input
-	SBI PORTB,0     
-
-	SBI DDRB,1
-	        
+	SET						; Set T in SREG.
+   
+	; Setting up the SDI (PB3).
 	SBI DDRB,3			    ; Pin PB3 is an output
 	CBI PORTB,3	
-
+	
+	; Setting up the data latch (LE/DM1)
 	SBI DDRB,4				; Pin PB4 is an output
 	CBI PORTB,4
-
+	
+	; Enabling the shift latch clock.
 	SBI DDRB,5				; Pin PB5 is an output
 	CBI PORTB,5
+
 	RJMP start
 
 ; ------------------- shift of the row in the screen ------------------------
 rowon :
-	ROL R21           ; Rotate to the left
-	BRCC rowoff
+	ROL R21				; Rotate to the left
+	BRCC rowoff			; Branch if Carry Cleared
 	SBI PORTB,3
 rowoff :
 	SBI PORTB,5
@@ -103,7 +106,7 @@ start :
 	LDI R18, 0b01000000     ; Send the row
 	DEC R22
 	BRNE display
-	BRTS clearT
+	BRTS clearT				; Branch if T Flag Set.
 	LDI R22,200
 	SET
 	RJMP display
@@ -117,7 +120,7 @@ display :
 	LDI R17,8               ; constant
 	LDI R19,16              ; counter of each blocks
 
-	LDI R21,0xFF            ; Transition on PIN D
+	LDI R21,0xFF            ; Transition on PIN D (intermediate state)
 	OUT DDRD,R21
 	OUT PORTD,R21
 
@@ -132,7 +135,7 @@ NEWcounter :
 	LDI random,255
 
 COUNTloop :
-	LDI R21,0xFF            ; Transition on PIN D
+	LDI R21,0xFF            ; Transition on PIN D (intermediate state)
 	OUT DDRD,R21
 	OUT PORTD,R21
 
@@ -163,22 +166,25 @@ READloop :
 	RJMP begin
 
 blocksloop :
-	LDI ZL,low(CharTable << 1)        ; First element in flash memory
+	LDI ZL,low(CharTable << 1)			; First element in flash memory
 	LDI ZH,high(CharTable << 1)
-	BRTS show
+	BRTS show							; Branch if T Flag Set.
 
 notshow :
 	LDI R21,0
 	RJMP block
-	LDI R20,5                ; We must shift 5 times
 
 show :
-	LD R21,-Y                       ; Load the line that we need on the flash
-	MUL R21,R17                     ; multiply by eight to have the first element of the line 
-	MOV R21,R0
+/*
+ * Z ponints toward the chartable and Y points toward the index of the chosen symbol in the chartable.
+ * This branch is responsible for showing the chosen symbols from the CharTable.
+ */
+	LD R21,-Y                       ; Load the line that we need on the flash (Load Indirect and Pre-Dec.) Last is sent first.
+	MUL R21,R17                     ; multiply by eight to have the first element of the line R1:R0 <- Rd x Rr
+	MOV R21,R0						; Move Between Registers Rd <- Rr
 	ADD R21,R16					    ; Add row to have the byte of the line
 	ADC ZL,R21                      ; Add this value on Z
-	BRCC nc
+	BRCC nc							; Branch if Carry Cleared
 	LDI R21,1
 	ADD ZH,R21
 	nc :
@@ -203,7 +209,7 @@ MOV R21,R18           ; Put the row shifting on another register
 RJMP rowon
 
 ; ---------------------------------------------------------------------------------------------------------------------------------------
-; -------------------------------------------------------- SNAKE ------------------------------------------------------------------------
+; -------------------------------------------------------- GAME ------------------------------------------------------------------------
 
 begin:
 	.DEF direction	= R25
@@ -224,12 +230,7 @@ begin:
 	LDI	R16,4
 	OUT TCCR0B,R16	
 
-	
-	;Set timer2 with the maximum prescaler
-	;LDI R16,7
-	;STS TCCR2B,R16
-
-
+	; The PRTIM1 bit in ”PRR – Power Reduction Register” must be written to zero to enable Timer/Counter1 module.
 	LDI R16,0
 	STS PRR,R16
 	;Set timer1 prescaler to 1024
@@ -240,26 +241,18 @@ begin:
 	LDI R16,56	
 	OUT TCNT0,R16
 
-	;Setting the TCNT1 value at 1Hz -> TCNT1  = 49911
+	;Setting the initial TCNT1 value.
 	LDI R16,0xFF	
-	LDI R19,0xF0
+	MOV R19,speed
 	STS TCNT1H,R19
 	STS TCNT1L,R16
 
-	;Setting the TCNT2 with the maximum value to have the lowest frequency
-	;LDI R16,255
-	;STS TCNT2,R16
-
-
-	;enable global interrupt & timer0 and timer2 interrupt
+	;enable global interrupt & timer0 and timer1 interrupt
 	LDI	R16,0x80
 	OUT	SREG,R16
 	LDI R16,1
 	STS	TIMSK0,R16
 	STS TIMSK1,R16
-
-	;STS TIMSK2,R16
-
 
 	;Clearing the outputs
 	SBI DDRB,3			    ; Pin PB3 is an output
@@ -417,7 +410,7 @@ LSFR270 :
 	MOV R16, random                 ; Clone random to R16                    ex : R16 = 0b01111110
 	MOV R19, random                 ; Clone random to R19                         R17 = 0b01111110
 	LSR random                      ; Shift to the right random                   random = 0b00111111
-	BST R16,0					    ; Take the first bit of R16                   T = 0
+	BST R16,0					    ; Take the first (LSB) bit of R16                   T = 0
 	BLD random,6                    ; Put this at seventh place of random         random = 0b00111111
 	BLD R19,6                       ; Same for R19                                R17 = 0b00111110
 	EOR R19,R16                     ; R19 = R16 xor R19                           R17 = 0b01000000
@@ -430,8 +423,8 @@ food :
 	LDI XL,0x00
 	ADD XL,random
 	LD R25,X
-	AND R25,bytefood
-	CPI R25,0
+	AND R25,bytefood				; Checkin if the generated position of the fruit is free.
+	CPI R25,0						; Compare Register with Immediate
 	BRNE LSFR270
 	LDI YL,0x00                     ; Begin Y = 0x0200
 	ADD YL,random				    ; Add it the random number smaller than 70
@@ -444,7 +437,7 @@ InitKeyboard:
     ; Configure input pin PD0 
 	LDI R16,0xFF
 	OUT DDRD,R16
-	OUT PORTD,R16               ; Transition of PIND
+	OUT PORTD,R16               ; Transition of PIND (intermediate state)
 
 	LDI R16,0xF0		        ; PIND 7:4 are outputs and 3:0 are inputs
 	OUT DDRD,R16
@@ -452,7 +445,10 @@ InitKeyboard:
 	OUT PORTD,R16
 	
 Main:
-	SBIS PIND,0
+/*
+ * The Main is responsible for reading user's inputs on the keyboard.
+ */
+	SBIS PIND,0					; Skip if Bit in I/O Register is Set
 	RJMP restart
 	SBIS PIND,1	    
 	RJMP right
@@ -462,167 +458,207 @@ Main:
 	RJMP left
 	RJMP Main
 
-reset :
-	LDI R16,0b10101001
-	STS WDTCSR,R16
-
 restart :
+/*
+ * Bottons on the first column from the right are reponsible for pausing and resterting the game.
+ */
+
+	; Transition of PIND (intermediate state)
 	LDI R16,0xFF
 	OUT DDRD,R16
-	OUT PORTD,R16				; Transition of PIND
+	OUT PORTD,R16				
 
+	; Iversion of the inputs and outputs of the keyboard
 	LDI R16,0x0F
 	OUT DDRD,R16
 	LDI R16,0xF0
 	OUT PORTD,R16
 	NOP
 
+	; If the player press' D the game pauses
+	LDI R16,0
 	SBIS PIND,5
-	RJMP reset
+	STS TIMSK1,R16				; desable timer1 interrupt
+
+	; If the player press' E the pause is over. 
+	LDI R16,1
+	SBIS PIND,6
+	STS TIMSK1,R16				; enable timer1 interrupt
+
 	RJMP InitKeyboard
 
 right:
+/*
+ * Sets the direction of the sprite to the right.
+ */
+
+	; Transition of PIND (intermediate state)
 	LDI R16,0xFF
 	OUT DDRD,R16
-	OUT PORTD,R16				; Transition of PIND
-
+	OUT PORTD,R16				
+	
+	; Iversion of the inputs and outputs of the keyboard
 	LDI R16,0x0F
 	OUT DDRD,R16
 	LDI R16,0xF0
 	OUT PORTD,R16
 	NOP
 
-	SBIS PIND,5
+	SBIS PIND,5				; If 3 is pressed direction is set to down
 	LDI direction,6
 	
 	RJMP InitKeyboard
 
 upOrDown:
+/*
+ * Sets the direction of the sprite up or down.
+ */
+
+	; Transition of PIND (intermediate state)
 	LDI R16,0xFF
 	OUT DDRD,R16
 	OUT PORTD,R16
 
+	; Iversion of the inputs and outputs of the keyboard
 	LDI R16,0x0F
 	OUT DDRD,R16
 	LDI R16,0xF0
 	OUT PORTD,R16
 	NOP
 
-	SBIS PIND,4
+	SBIS PIND,4				; If 0 is pressed direction is set to down
 	LDI direction,2
-	SBIS PIND,6
+	SBIS PIND,6				; If 5 is pressed direction is set to up
 	LDI direction,8
 
 	RJMP InitKeyboard
 
 left :
+/*
+ * Sets the direction of the sprite to the left.
+ */
+
+	; Transition of PIND (intermediate state)
 	LDI R16,0xFF
 	OUT DDRD,R16
 	OUT PORTD,R16
 
+	; Iversion of the inputs and outputs of the keyboard
 	LDI R16,0x0F
 	OUT DDRD,R16
 	LDI R16,0xF0
 	OUT PORTD,R16
 	NOP
 
-	SBIS PIND,5
+	SBIS PIND,5				; If 1 is pressed direction is set to down
 	LDI direction,4
 
 	RJMP InitKeyboard
 
 
 moveRight:
-	; Horisontal movement----------------------------------
-	ROR bytesnake							; Horisontal diplacement
+/*
+ * The horizontal movement is done throught rotation of the byte where is located the sprite.
+ * If the carry of the rotation is set then the sprite has to switch to the next 
+ * LED module according to the direction of its movement.
+ */
+	
+	ROR bytesnake						; Horisontal diplacement
 	BRCC isZero
-	/* 
-	The carry bit is set so we've got to change the rectangle to the one on the right 
-	*/
 
-	ST Z,bytesnake						; Write R17 to the current Z
-	ROR bytesnake							; Rotating R17 here puts back the carry into the bit sequence
-	LDI R16,65						; We've got to check if we reached the screen boundary
-	CheckWall5:
-		CP ZL,R16
+	; The carry bit is set so we've got to change the rectangle to the one on the right 
+
+	ST Z,bytesnake						; Write bytesnake to the current Z
+	ROR bytesnake						; Rotating R17 here puts back the carry into the bit sequence
+	LDI R16,65							; We've got to check if we reached the screen boundary
+
+	; Check if the sprite is on the upper right LED module. 
+	CheckWall5:							; Addresses 05,15,25,35,45,55,65 has to be checked
+		CP ZL,R16						; Compare Rd - Rr
 		BRNE notLineX5
-	ADIW Z,4
-	ST Z,bytesnake
+	ADIW Z,4							; Sprite switch to the oder side of the screen.
+	ST Z,bytesnake						; Write the sprite to the next address.
 	CLC
 	RJMP notDown
 	notLineX5:
-
 		SUBI R16,10
 		BRGE CheckWall5
-	LDI R16,70
 
-	CheckWall0:
-		CP ZL,R16
+	; Check if the sprite is on the down right LED module. 
+	LDI R16,60							; Addresses 0,10,20,30,40,50,60 has to be checked
+	CheckWall0:							
+		CP ZL,R16						; Compare Rd - Rr
 		BRNE notLineX0
-	ADIW Z,4
-	ST Z,bytesnake
+	ADIW Z,4							; Sprite switch to the oder side of the screen.
+	ST Z,bytesnake						; Write the sprite to the next address.
 	CLC
 	RJMP notDown
 	notLineX0:
 		SUBI R16,10
 		BRGE CheckWall0
-	ST -Z,bytesnake
+
+	; The sprite doesn't change the side of the seen
+	ST -Z,bytesnake						; Write the sprite to the next address. 
 	CLC
-	RJMP notDown
+	RJMP notDown						; Finish the move.
 	isZero:
-		ST Z,bytesnake							; Horisontal diplacement
-		RJMP notDown
-	;------------------------------------------------------
+		ST Z,bytesnake					; Horisontal diplacement
+		RJMP notDown					; Finish the move.
+	
 
 moveLeft:
-	; Horisontal movement----------------------------------
-	ROL bytesnake							; Horisontal diplacement
+	/*
+	 * The horizontal movement is done throught rotation of the byte where is located the sprite.
+	 * If the carry of the rotation is set then the sprite has to switch to the next 
+	 * LED module according to the direction of its movement.
+	 */
+
+	ROL bytesnake						; Horisontal diplacement
 	BRCC noCarry
-	ST Z,bytesnake
-	ROL bytesnake
-	
-	LDI R16,69
-	CheckWall9:
-		CP ZL,R16
+
+	; The carry bit is set so we've got to change the rectangle to the one on the left
+	ST Z,bytesnake						; Write bytesnake to the current Z
+	ROL bytesnake						; Rotating R17 here puts back the carry into the bit sequence
+							
+	LDI R16,69							; We've got to check if we reached the screen boundary
+	CheckWall9:							; Addresses 9,19,29,39,49,59,69 has to be checked
+		CP ZL,R16						; Compare Rd - Rr
 		BRNE notLineX9
-	SBIW Z,4
-	ST Z,bytesnake
+	SBIW Z,4							; Sprite switch to the oder side of the screen.
+	ST Z,bytesnake						; Write the sprite to the next address.
 	CLC
-	RJMP notDown
+	RJMP notDown						; Finish the move.
 	notLineX9:
 		SUBI R16,10
-		BRGE CheckWall9
+		BRGE CheckWall9					; Finish the move.
 
 
-	LDI R16,64
+	LDI R16,64							; We've got to check if we reached the screen boundary
 
-	CheckWall4:
-		CP ZL,R16
+	CheckWall4:							; Addresses 4,14,24,34,44,54,64 has to be checked
+		CP ZL,R16						; Compare Rd - Rr
 		BRNE notLineX4
-	SBIW Z,4
-	ST Z,bytesnake
+	SBIW Z,4							; Sprite switch to the oder side of the screen.
+	ST Z,bytesnake						; Write the sprite to the next address.
 	CLC
-	RJMP notDown
+	RJMP notDown						; Finish the move.
 	notLineX4:
 		SUBI R16,10
 		BRGE CheckWall4
+
+	; The sprite doesn't change the side of the seen
 	ADIW Z,1
 	ST Z,bytesnake
 	CLC
-	RJMP notDown
+	RJMP notDown						; Finish the move.
 	noCarry:
-		ST Z,bytesnake							; Horisontal diplacement
+		ST Z,bytesnake					; Horisontal diplacement
 		RJMP notDown
-	;------------------------------------------------------
-
-
-;Timer2OverflowInterrupt:
-;RETI
 
 
 Timer1OverflowInterrupt:
 /*
-This interrupt moves the spread.
+This interrupt moves the spread. It takes the direction set by the player and runs the corresponding branch.
 */
 	PUSH YL
 	PUSH XL
@@ -631,70 +667,69 @@ This interrupt moves the spread.
 
 	LDI ZH,0x01
 
-	CPI direction,6
+	CPI direction,6						; Compare Register with Immediate
 	BRNE notRight
 	RJMP moveRight
 	
 	notRight:
-		CPI direction,4
+		CPI direction,4					; Compare Register with Immediate
 		BRNE notLeft
 	RJMP moveLeft
 
 	notLeft:
-		CPI direction,8
+		CPI direction,8					; Compare Register with Immediate
 		BRNE notUp
 
-	;Vertical movement-------------------------------
+	;Vertical movement up-------------------------------
 	LDI R16,0
 	ST Z,R16							; Set Z to 0
 
 	MOV R19,ZL
 	CPI ZL,60							; Compare ZL to 60 if higher then change the rect
-	BRLO ChangeBlockUp
+	BRLO ChangeBlockUp					; Branch if Lower
 	LDI R16,65
 	SUB ZL,R16							;Subtract 65 from ZL but don't worry we add 10 at the end!
 	CPI R19,65							;Compare the original ZL with 75 to see if we are at the top of the screen
-	BRLO ChangeBlockUp
+	BRLO ChangeBlockUp					; Branch if Lower
 	SBIW ZL,10
 	ChangeBlockUp:
 		ADIW ZL,10						; Subtract 10 from Z
 		LDI ZH,0x01
 		ST Z,bytesnake
 	RJMP notDown
-	;------------------------------------------------
+	
 	notUp:
-		CPI direction,2
+		CPI direction,2					; Compare Register with Immediate
 		BRNE notDown
-	;Vertical movement-------------------------------
+	;Vertical movement down-------------------------------
 	LDI R16,0
 	ST Z,R16							; Set Z to 0
 
 	MOV R19,ZL							; Value of ZL to R19
 	CPI ZL,10							; Compare ZL to 10 if smaller then change the rect
-	BRSH ChangeBlock
+	BRSH ChangeBlock					; Branch if Same or Higher
 	LDI R16,65						
 	ADD ZL,R16							;Adding 65 to ZL since it is lower than 20
 	CPI R19,5							;Compare the original ZL with 5 to see if we are at the bottom of the screen
-	BRSH ChangeBlock
+	BRSH ChangeBlock					; Branch if Same or Higher
 	ADIW ZL,10							;We're at the bottom so ZL = ZL + 65 + 10
 	ChangeBlock:
 		SBIW ZL,10							; Subtract 10 from Z
 		LDI ZH,0x01
 		ST Z,bytesnake
 
-	;------------------------------------------------
 	notDown:
 	/*
 	This small section is responisible for eating an obstacle/object.
 	*/
 	MOV XL,ZL
 	LD R19,X
-	AND R19,bytesnake
+	AND R19,bytesnake					; Check if the sprite is on the wall.
 	CPI R19,0
 	BRNE Gameover
 	MOV YL,ZL
 	LD R19,Y
-	SUB R19,bytesnake
+	SUB R19,bytesnake					; Check if the sprite is on the fruit .
 	BRNE noOnFood
 
 	ST Y,R19         
@@ -735,7 +770,7 @@ speedTurn:
 		LDI XL,0x00
 		ADD XL,random
 		LD R16,X
-		AND R16,bytesnake
+		AND R16,bytesnake				; Check if the fruits is generated on the sprite.
 		CPI R16,0
 		BRNE LSFR270new 
 	foodnew : 
@@ -864,6 +899,11 @@ Send1Row:
 
 	TST R22									;Check if R22 = 0x00
 	BRNE Send1Row							;If R22 != 0x00 plot next row if not, stop the time interrupt
+	
+	;Setting the TCNT0 value at 312Hz
+	LDI R16,56	
+	OUT TCNT0,R16
+
 	POP YL
 	POP ZL
 
@@ -880,41 +920,41 @@ Send1Row:
 mazeGame :
 	LDI XL,0x00
 	LDI XH,0x01
-	LDI R16,13
+	LDI R16,13								;G
 	ST X+,R16
-	LDI R16,11
+	LDI R16,11								;A
 	ST X+,R16
-	LDI R16,14
+	LDI R16,14								;M
 	ST X+,R16
-	LDI R16,12
+	LDI R16,12								;E
 	ST X+,R16
-	LDI R16,10
+	LDI R16,10								;space
 	ST X+,R16
 	ST X+,R16
 	MOV R16,score2
 	ST X+,R16
 	MOV R16,score1
 	ST X+,R16
-	LDI R16,15
+	LDI R16,15								;O
 	ST X+,R16
-	LDI R16,20
+	LDI R16,20								;V
 	ST X+,R16
-	LDI R16,12
+	LDI R16,12								;E
 	ST X+,R16
-	LDI R16,17
+	LDI R16,17								;R
 	ST X+,R16
-	LDI R16,10
+	LDI R16,10								;space
 	ST X+,R16
-	LDI R16,16
+	LDI R16,16								;P
 	ST X+,R16
-	LDI R16,19
+	LDI R16,19								;T
 	ST X+,R16
-	LDI R16,18
+	LDI R16,18								;S
 	ST X,R16
 
 startGame :
-	LDI R16,6
-	LDI R18,0b01000000
+	LDI R16,6								; Count from 6 to 0 to have all the flash line
+	LDI R18,0b01000000						; Send the row
 
 displayGame :
 	LDI XL,0x10
@@ -926,21 +966,21 @@ blocksloopGame :
 	LDI ZL,low(CharTable << 1)
 	LDI ZH,high(CharTable << 1)
 	LD R21,-X
-	MUL R21,R17
-	MOV R21,R0
-	ADD R21,R16
-	ADC ZL,R21
-	BRCC ncGame
+	MUL R21,R17								; multiply by eight to have the first element of the line R1:R0 <- Rd x Rr
+	MOV R21,R0								; Move Between Registers Rd <- Rr
+	ADD R21,R16								; Add row to have the byte of the line
+	ADC ZL,R21								; Add with Carry two Registers
+	BRCC ncGame								; Branch if carry cleared
 	LDI R21,1
 	ADD ZH,R21
 	ncGame :
-		LPM R21,Z
-		LDI R20,5
+		LPM R21,Z							; Load the byte at the position stored in Z in R21
+		LDI R20,5							; The diplayed symbol is 5 bits large.
 
 blockGame :
-	ROR R21
+	ROR R21									; shift to the right R21 
 	BRCC turnoffGame
-	SBI PORTB,3
+	SBI PORTB,3								; If it's a one turn on the LED
 
 turnoffGame :
 	SBI PORTB,5
@@ -962,7 +1002,7 @@ rowoffGame :
 	SBI PORTB,5
 	CBI PORTB,5
 	CBI PORTB,3
-	DEC R17
+	DEC R17									; Decrement the rows
 	BRNE rowonGame
 
 SBI PORTB,4
@@ -978,11 +1018,14 @@ wait1Game:
 CBI PORTB,4
 
 DEC R16
-LSR R18
+LSR R18										; Logical Shift Right
 BREQ startGame
 RJMP displayGame
 
 CharTable:
+/*
+ *Every character in the flash memory by using the .db directive.
+ */
 .db 0b00011111,0b00010001,0b00010001,0b00010001,0b00010001,0b00010001,0b00011111,0b00000000 ; 0
 .db 0b00000100,0b00001100,0b00010100,0b00000100,0b00000100,0b00000100,0b00011111,0b00000000 ; 1
 .db 0b00011111,0b00010001,0b00000001,0b00000010,0b00000100,0b00001000,0b00011111,0b00000000 ; 2
