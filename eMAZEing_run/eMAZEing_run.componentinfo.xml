@@ -41,7 +41,7 @@
 					<Attribute>template</Attribute>
 					<Category>source</Category>
 					<Condition>AVRASM</Condition>
-					<FileContentHash>PyHw/BS/BiXbSPi65ZTXJA==</FileContentHash>
+					<FileContentHash>L5jGcd/izJ7Cm104+4RbxQ==</FileContentHash>
 					<FileVersion></FileVersion>
 					<Name>avrasm/templates/main.asm</Name>
 					<SelectString>Main file (.asm)</SelectString>
